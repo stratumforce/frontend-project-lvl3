@@ -1,0 +1,9 @@
+:root {
+  --primary-color: #ffcc66;
+  --secondary-color: #1f2430;
+}
+
+.jumbotron {
+  background-color: var(--secondary-color);
+  color: var(--primary-color);
+}
