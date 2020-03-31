@@ -3,6 +3,14 @@
   --secondary-color: #1f2430;
 }
 
+body {
+  background-color: var(--secondary-color);
+}
+
+.cursor-default {
+  cursor: default;
+}
+
 .jumbotron {
   background-color: var(--secondary-color);
   color: var(--primary-color);

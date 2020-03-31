@@ -7,22 +7,36 @@
     <title>Simple RSS Reader</title>
   </head>
   <body>
-    <div class="container-fluid">
-      <div class="jumbotron text-center">
-        <h1 class="mb-4">Simple RSS Reader</h1>
-        <form
-          class="d-flex flex-column justify-content-center align-items-center"
-        >
-          <div class="form-group w-50">
-            <label for="rss-feed">Add RSS Feed</label>
-            <input
-              type="text"
-              class="form-control"
-              id="rss-feed"
-              placeholder="Enter RSS Feed URL"
-            />
+    <div class="container">
+      <div class="jumbotron">
+        <!-- Header -->
+        <div class="row justify-content-center">
+          <h1 class="col mb-4 text-center cursor-default">Simple RSS Reader</h1>
+        </div>
+        <!-- Form -->
+        <form class="row justify-content-center">
+          <div class="col-12 col-md-10 col-lg-8 col-xl-6">
+            <div class="form-row">
+              <div class="col text-center">
+                <div class="form-group">
+                  <label for="rss-feed">Add RSS Feed</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="rss-feed"
+                    placeholder="Enter RSS Feed URL"
+                  />
+                </div>
+              </div>
+            </div>
+            <div class="form-row justify-content-center">
+              <div class="col">
+                <button type="submit" class="btn btn-warning w-100">
+                  Submit
+                </button>
+              </div>
+            </div>
           </div>
-          <button type="submit" class="btn btn-warning w-50">Submit</button>
         </form>
       </div>
     </div>
