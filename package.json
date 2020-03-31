@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "engines": {
-    "node": ">=13"
+    "node": "12.x"
   },
   "scripts": {
     "build-frontend": "NODE_ENV=production npx webpack -p",
