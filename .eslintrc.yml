@@ -21,3 +21,4 @@ extends:
 
 rules:
   prettier/prettier: error
+  import/extensions: 0
