@@ -14,26 +14,29 @@
           <h1 class="col mb-4 text-center cursor-default">Simple RSS Reader</h1>
         </div>
         <!-- Form -->
-        <form class="row justify-content-center">
-          <div class="col-12 col-md-10 col-lg-8 col-xl-6">
-            <div class="form-row">
-              <div class="col text-center">
-                <div class="form-group">
-                  <label for="rss-feed">Add RSS Feed</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="rss-feed"
-                    placeholder="Enter RSS Feed URL"
-                  />
+        <form class="frm-feed" name="frm-feed">
+          <div class="row justify-content-center">
+            <div class="column col-12 col-md-10 col-lg-8 col-xl-6">
+              <div class="form-row">
+                <div class="col text-center">
+                  <div class="form-group">
+                    <label for="rss-feed">Add RSS Feed</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="rss-feed"
+                      name="feed"
+                      placeholder="Enter RSS Feed URL"
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
-            <div class="form-row justify-content-center">
-              <div class="col">
-                <button type="submit" class="btn btn-warning w-100">
-                  Submit
-                </button>
+              <div class="form-row justify-content-center mb-3">
+                <div class="col">
+                  <button type="submit" class="btn btn-warning w-100" disabled>
+                    Submit
+                  </button>
+                </div>
               </div>
             </div>
           </div>
