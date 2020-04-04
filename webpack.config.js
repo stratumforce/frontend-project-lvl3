@@ -3,6 +3,7 @@ const glob = require('glob');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const PurgecssPlugin = require('purgecss-webpack-plugin');
+const LodashModuleReplacementPlugin = require('lodash-webpack-plugin');
 
 const PATHS = {
   src: path.join(__dirname, 'src'),
@@ -53,6 +54,7 @@ module.exports = {
         removeComments: 'true',
       },
     }),
+    new LodashModuleReplacementPlugin(),
   ],
   devServer: {
     contentBase: path.join(__dirname, 'dist'),
