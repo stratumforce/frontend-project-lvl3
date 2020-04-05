@@ -1,5 +1,6 @@
 const path = require('path');
 const glob = require('glob');
+const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const PurgecssPlugin = require('purgecss-webpack-plugin');
@@ -55,6 +56,13 @@ module.exports = {
       },
     }),
     new LodashModuleReplacementPlugin(),
+    new webpack.ProvidePlugin({
+      $: 'jquery',
+      Popper: ['popper.js', 'default'],
+      Alert: 'exports-loader?Alert!bootstrap/js/dist/alert',
+      Button: 'exports-loader?Button!bootstrap/js/dist/button',
+      Util: 'exports-loader?Util!bootstrap/js/dist/util',
+    }),
   ],
   devServer: {
     contentBase: path.join(__dirname, 'dist'),
