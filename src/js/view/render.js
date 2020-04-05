@@ -1,4 +1,4 @@
-import renderFeedForm from './form';
+import renderFeedForm from './components/form';
 
 const components = {
   feedForm: renderFeedForm,

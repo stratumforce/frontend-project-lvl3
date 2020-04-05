@@ -35,7 +35,11 @@ export default (event, state) => {
 
   if (!isAvailableUrl(state)) {
     feedForm.isValid = false;
-    feedForm.state = 'duplicate';
+    feedForm.state = 'error';
+
+    const error = 'Feed has been already added';
+    feedForm.errors = [...feedForm.errors, error];
+
     return null;
   }
 

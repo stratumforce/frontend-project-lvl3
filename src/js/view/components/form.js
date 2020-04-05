@@ -1,14 +1,13 @@
-import createElement from './util';
+import createAlert from './alert';
 
 const getForm = () => document.forms['frm-feed'];
 
-const getAlertMessage = ({ feedForm }) => {
-  const messages = {
-    duplicate: 'Feed has been already added',
-    timeout: 'Timeout',
-  };
+const showAlert = (msg) => {
+  const alertEl = createAlert(msg, 3000);
+  console.log(alertEl);
 
-  return messages[feedForm.state];
+  const parent = document.querySelector('.frm-feed .column');
+  parent.append(alertEl);
 };
 
 const isBtnDisabled = ({ feedForm }) => {
@@ -23,23 +22,6 @@ const isInputFieldDisabled = ({ feedForm }) => {
   const blacklist = ['send', 'duplicate'];
 
   return blacklist.includes(feedForm.state);
-};
-
-const showAlert = (text) => {
-  const row = createElement('div', 'row');
-  const col = createElement('div', 'col');
-
-  const alert = createElement('div', 'alert', 'alert-danger');
-  alert.setAttribute('role', 'alert');
-  alert.textContent = text;
-
-  col.append(alert);
-  row.append(col);
-
-  const parent = document.querySelector('.frm-feed .column');
-  parent.append(row);
-
-  setTimeout(() => row.remove(), 3000);
 };
 
 const renderInputField = (state) => {
@@ -64,15 +46,18 @@ const renderBtn = (state) => {
   btn.disabled = isBtnDisabled(state);
 };
 
-export default (state) => {
+const renderErrors = (state) => {
   const { feedForm } = state;
 
-  renderInputField(state);
-  renderBtn(state);
-
-  const alertMessage = getAlertMessage(state);
-  if (alertMessage) {
-    showAlert(alertMessage);
+  if (feedForm.state === 'error') {
+    feedForm.errors.forEach(showAlert);
+    feedForm.errors = [];
     feedForm.state = 'input';
   }
+};
+
+export default (state) => {
+  renderInputField(state);
+  renderBtn(state);
+  renderErrors(state);
 };

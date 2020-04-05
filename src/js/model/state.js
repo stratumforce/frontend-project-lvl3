@@ -3,6 +3,7 @@ export default {
     state: 'input',
     isValid: false,
     value: '',
+    errors: [],
   },
   feeds: {
     channels: [],
