@@ -8,9 +8,9 @@ const validateInput = (state) => {
   });
 };
 
-export default (value, state) => {
+export default ({ target }, state) => {
   const { feedForm } = state;
 
-  feedForm.value = value;
+  feedForm.value = target.value;
   validateInput(state);
 };

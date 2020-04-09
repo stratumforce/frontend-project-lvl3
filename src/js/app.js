@@ -9,11 +9,6 @@ export default () => {
 
   const form = document.forms['frm-feed'];
 
-  form.addEventListener('submit', (event) => {
-    submitController(event, state);
-  });
-
-  form.addEventListener('input', ({ target }) =>
-    inputController(target.value, state)
-  );
+  form.addEventListener('submit', (event) => submitController(event, state));
+  form.addEventListener('input', (event) => inputController(event, state));
 };
