@@ -4,9 +4,8 @@ const getForm = () => document.forms['frm-feed'];
 
 const showAlert = (msg) => {
   const alertEl = createAlert(msg, 3000);
-  console.log(alertEl);
 
-  const parent = document.querySelector('.frm-feed .column');
+  const parent = document.querySelector('.frm-feed');
   parent.append(alertEl);
 };
 
