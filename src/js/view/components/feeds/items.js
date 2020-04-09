@@ -1,4 +1,22 @@
-import createElement from './util';
+import _ from 'lodash';
+
+import createElement from '../util';
+
+const getActiveChannelItems = (items, channelId) =>
+  items.filter((item) => item.channelId === channelId);
+
+const getItems = ({ feeds }) => {
+  const { channels } = feeds;
+  const activeChannel = _.find(channels, { isActive: true });
+
+  if (activeChannel === undefined) {
+    return [...feeds.items];
+  }
+
+  const items = getActiveChannelItems(feeds.items, activeChannel.id);
+
+  return items;
+};
 
 const createTitle = (content) => {
   const title = createElement('div', 'card-title');
@@ -23,6 +41,7 @@ const createLink = ({ title, link: url }) => {
   link.href = url;
   link.textContent = title;
   link.setAttribute('title', title);
+  link.setAttribute('target', '_blank');
 
   return link;
 };
@@ -50,14 +69,16 @@ const buildElement = (feed, channel) => {
   return card;
 };
 
-const buildItemsList = ({ feeds }) => {
+const buildItemsList = (state) => {
+  const { feeds } = state;
   const { channels } = feeds;
 
   const itemsList = createElement('div', 'items-list');
 
-  const elements = [...feeds.items].map((feed) => {
-    const channel = channels.find((ch) => ch.id === feed.channelId);
-    return buildElement(feed, channel);
+  const items = getItems(state);
+  const elements = items.map((item) => {
+    const channel = _.find(channels, { id: item.channelId });
+    return buildElement(item, channel);
   });
 
   itemsList.append(...elements);

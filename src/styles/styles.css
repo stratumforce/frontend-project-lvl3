@@ -22,6 +22,10 @@ body {
   background-color: var(--primary-color);
 }
 
+.channel-active .channel-link {
+  font-weight: 700;
+}
+
 .channel-link {
   display: block;
   overflow: hidden;

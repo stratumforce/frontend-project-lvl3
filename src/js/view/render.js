@@ -1,11 +1,9 @@
-import renderChannels from './components/channels';
 import renderFeedForm from './components/form';
-import renderItems from './components/items';
+import renderFeeds from './components/feeds';
 
 const components = {
-  channels: renderChannels,
   feedForm: renderFeedForm,
-  items: renderItems,
+  feeds: renderFeeds,
 };
 
 export default (state, component) => {
