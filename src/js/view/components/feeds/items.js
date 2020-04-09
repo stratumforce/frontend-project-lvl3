@@ -35,10 +35,11 @@ const createSubtitle = ({ pubDate }, { title }) => {
   return subtitle;
 };
 
-const createLink = ({ title, link: url }) => {
+const createLink = ({ title, guid, link: url }) => {
   const link = createElement('a', 'item-link');
+  const href = guid.isPermaLink ? guid.link : url;
 
-  link.href = url;
+  link.href = href;
   link.textContent = title;
   link.setAttribute('title', title);
   link.setAttribute('target', '_blank');

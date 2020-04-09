@@ -15,9 +15,11 @@ const getGuid = (parent) => {
 
   let guid = null;
   if (_.isElement(guidEl)) {
+    const isPermaLink = guidEl.getAttribute('isPermaLink');
+
     guid = {
-      content: guidEl.textContent.trim(),
-      isPermaLink: guidEl.getAttribute('isPermaLink'),
+      link: guidEl.textContent.trim(),
+      isPermaLink: _.defaultTo(JSON.parse(isPermaLink), true),
     };
   }
 
