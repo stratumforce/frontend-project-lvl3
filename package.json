@@ -65,6 +65,7 @@
     "axios": "^0.19.2",
     "bootstrap": "^4.4.1",
     "glob": "^7.1.6",
+    "i18next": "^19.4.0",
     "jquery": "^3.4.1",
     "lodash": "^4.17.15",
     "melanke-watchjs": "^1.5.2",

@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import i18next from 'i18next';
 
 import get from '../lib/feed';
 
@@ -15,6 +16,18 @@ const pushError = (state, msg) => {
     state: 'error',
     errors: [...feedForm.errors, msg],
   });
+};
+
+const errorHandler = (state, error) => {
+  const errorPath = 'feedForm.errors.';
+
+  const msg = i18next.t([
+    `${errorPath}${error.code}`,
+    `${errorPath}${error.response && error.response.status}`,
+    `${errorPath}default`,
+  ]);
+
+  pushError(state, msg);
 };
 
 const isAvailableUrl = (url, channels) => !_.some(channels, { originURL: url });
@@ -44,9 +57,11 @@ const processInput = (state) => {
     lock(state);
     getFeed(state)
       .then((feed) => addFeed(state, { ...feed, originURL: url }))
-      .then(() => clear(state))
-      .then(() => unlock(state))
-      .catch((err) => pushError(state, err.message));
+      .then(() => {
+        clear(state);
+        unlock(state);
+      })
+      .catch((error) => errorHandler(state, error));
   } else {
     invalidateForm(state);
     pushError(state, 'Feed has been already added');
