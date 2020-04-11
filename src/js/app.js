@@ -15,13 +15,11 @@ const setEvents = (state) => {
 export default () => {
   const state = initialState;
 
-  i18next
-    .init({
-      lng: 'en',
-      resources,
-    })
-    .then(() => {
-      runWatchers(state);
-      setEvents(state);
-    });
+  i18next.init({
+    lng: 'en',
+    resources,
+  });
+
+  runWatchers(state);
+  setEvents(state);
 };
