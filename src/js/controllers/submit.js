@@ -1,29 +1,40 @@
 import _ from 'lodash';
+import axios from 'axios';
 
 import { setFormState, setFeedsState } from '../model/state';
 
-import get from '../lib/feed';
+import parse from '../lib/feed';
 
 const lock = (state) => setFormState(state, { state: 'send' });
 const unlock = (state) => setFormState(state, { state: 'input' });
-const invalidateForm = (state) => setFormState(state, { isValid: false });
+const invalidate = (state) => setFormState(state, { isValid: false });
 const clear = (state) => setFormState(state, { value: '' });
 
-const releaseForm = (state) => {
-  clear(state);
-  unlock(state);
-};
-
 const errorHandler = (state, error) => {
+  invalidate(state);
+
   setFormState(state, {
     state: 'input',
     error,
   });
 };
 
-const isAvailableUrl = (url, channels) => !_.some(channels, { originURL: url });
+const getFeed = ({ feedForm }) => {
+  const corsAnywhereURL = 'https://cors-anywhere.herokuapp.com/';
+  const url = `${corsAnywhereURL}${feedForm.value}`;
 
-const getFeed = ({ feedForm }) => get(feedForm.value);
+  return axios.get(url);
+};
+
+const parseFeed = (dom) => {
+  const feed = parse(dom);
+
+  if (!feed) {
+    throw new Error('EPARSERERROR');
+  }
+
+  return feed;
+};
 
 const addFeed = (state, feed, originURL) => {
   const { feeds } = state;
@@ -41,25 +52,25 @@ const addFeed = (state, feed, originURL) => {
   });
 };
 
-const processInput = (state) => {
+export default (event, state) => {
+  event.preventDefault();
+
   const { feedForm, feeds } = state;
   const { value: url } = feedForm;
 
-  const isAvailable = isAvailableUrl(url, feeds.channels);
+  const isDuplicate = _.some(feeds.channels, { originURL: url });
 
-  if (isAvailable) {
-    lock(state);
-    getFeed(state)
-      .then((feed) => addFeed(state, feed, url))
-      .then(() => releaseForm(state))
-      .catch((error) => errorHandler(state, error));
-  } else {
-    invalidateForm(state);
+  if (isDuplicate) {
     errorHandler(state, new Error('EDUPLICATE'));
+    return;
   }
-};
 
-export default (event, state) => {
-  event.preventDefault();
-  processInput(state);
+  lock(state);
+
+  getFeed(state)
+    .then((res) => parseFeed(res.data))
+    .then((feed) => addFeed(state, feed, url))
+    .then(() => clear(state))
+    .catch((error) => errorHandler(state, error))
+    .finally(() => unlock(state));
 };
