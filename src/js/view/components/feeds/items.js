@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-import createElement from '../util';
+import { createElement } from '../util';
 
 const getActiveChannelItems = (items, channelId) =>
   items.filter((item) => item.channelId === channelId);

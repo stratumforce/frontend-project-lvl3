@@ -1,13 +1,4 @@
-import createAlert from './alert';
-
-const getForm = () => document.forms['frm-feed'];
-
-const showAlert = (msg) => {
-  const alertEl = createAlert(msg, 3000);
-
-  const parent = document.querySelector('.frm-feed');
-  parent.append(alertEl);
-};
+import { getForm } from './util';
 
 const isBtnDisabled = ({ feedForm }) => {
   const blacklist = ['send', 'duplicate'];
@@ -45,18 +36,7 @@ const renderBtn = (state) => {
   btn.disabled = isBtnDisabled(state);
 };
 
-const renderErrors = (state) => {
-  const { feedForm } = state;
-
-  if (feedForm.state === 'error') {
-    feedForm.errors.forEach(showAlert);
-    feedForm.errors = [];
-    feedForm.state = 'input';
-  }
-};
-
 export default (state) => {
   renderInputField(state);
   renderBtn(state);
-  renderErrors(state);
 };

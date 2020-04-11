@@ -1,6 +1,7 @@
 import $ from 'jquery';
+import i18next from 'i18next';
 
-import createElement from './util';
+import { createElement, getForm } from './util';
 
 const buildDismissibleBtn = () => {
   const button = createElement('button', 'close');
@@ -60,12 +61,33 @@ const removeAlert = (alertEl) => {
   $(alertEl).find('.alert').alert('close');
 };
 
-export default (msg, timeout) => {
+const getErrorMessage = (error) => {
+  const errorPath = 'feedForm.errors.';
+
+  const msg = i18next.t([
+    `${errorPath}${error.code}`,
+    `${errorPath}${error.response && error.response.status}`,
+    `${errorPath}${error.message}`,
+    `${errorPath}default`,
+  ]);
+
+  return msg;
+};
+
+const showAlert = (error) => {
+  const msg = getErrorMessage(error);
   const alertEl = buildAlert(msg);
 
-  if (timeout) {
-    setTimeout(() => removeAlert(alertEl), timeout);
-  }
+  setTimeout(() => removeAlert(alertEl), 3000);
 
-  return alertEl;
+  const parent = getForm();
+  parent.append(alertEl);
+};
+
+export default (state) => {
+  const { error } = state.feedForm;
+
+  if (error) {
+    showAlert(error);
+  }
 };

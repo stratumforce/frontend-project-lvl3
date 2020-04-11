@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-import createElement from '../util';
+import { createElement } from '../util';
 import channelLinkHandler from '../../../controllers/channel';
 
 const composeUnifyingChannel = ({ feeds }) => {

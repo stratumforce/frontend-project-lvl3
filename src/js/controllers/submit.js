@@ -1,50 +1,44 @@
 import _ from 'lodash';
-import i18next from 'i18next';
+
+import { setFormState, setFeedsState } from '../model/state';
 
 import get from '../lib/feed';
 
-const setFormState = (state, newState) => _.merge(state.feedForm, newState);
 const lock = (state) => setFormState(state, { state: 'send' });
 const unlock = (state) => setFormState(state, { state: 'input' });
 const invalidateForm = (state) => setFormState(state, { isValid: false });
 const clear = (state) => setFormState(state, { value: '' });
 
-const pushError = (state, msg) => {
-  const { feedForm } = state;
-
-  setFormState(state, {
-    state: 'error',
-    errors: [...feedForm.errors, msg],
-  });
+const releaseForm = (state) => {
+  clear(state);
+  unlock(state);
 };
 
 const errorHandler = (state, error) => {
-  const errorPath = 'feedForm.errors.';
-
-  const msg = i18next.t([
-    `${errorPath}${error.code}`,
-    `${errorPath}${error.response && error.response.status}`,
-    `${errorPath}default`,
-  ]);
-
-  pushError(state, msg);
+  setFormState(state, {
+    state: 'input',
+    error,
+  });
 };
 
 const isAvailableUrl = (url, channels) => !_.some(channels, { originURL: url });
 
 const getFeed = ({ feedForm }) => get(feedForm.value);
 
-const addFeed = (state, feed) => {
+const addFeed = (state, feed, originURL) => {
   const { feeds } = state;
 
   const channel = {
     ...feed.channel,
-    originURL: feed.originURL,
+    originURL,
     isActive: false,
   };
 
-  feeds.channels = [...feeds.channels, channel];
-  feeds.items = [...feeds.items, ...feed.items];
+  const { items } = feed;
+  setFeedsState(state, {
+    channels: [...feeds.channels, channel],
+    items: [...feeds.items, ...items],
+  });
 };
 
 const processInput = (state) => {
@@ -56,15 +50,12 @@ const processInput = (state) => {
   if (isAvailable) {
     lock(state);
     getFeed(state)
-      .then((feed) => addFeed(state, { ...feed, originURL: url }))
-      .then(() => {
-        clear(state);
-        unlock(state);
-      })
+      .then((feed) => addFeed(state, feed, url))
+      .then(() => releaseForm(state))
       .catch((error) => errorHandler(state, error));
   } else {
     invalidateForm(state);
-    pushError(state, 'Feed has been already added');
+    errorHandler(state, new Error('EDUPLICATE'));
   }
 };
 
