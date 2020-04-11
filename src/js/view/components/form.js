@@ -1,19 +1,5 @@
 import { getForm } from './util';
 
-const isBtnDisabled = ({ feedForm }) => {
-  const blacklist = ['send', 'duplicate'];
-
-  if (!feedForm.isValid) return true;
-
-  return blacklist.includes(feedForm.state);
-};
-
-const isInputFieldDisabled = ({ feedForm }) => {
-  const blacklist = ['send', 'duplicate'];
-
-  return blacklist.includes(feedForm.state);
-};
-
 const renderInputField = (state) => {
   const { feedForm } = state;
 
@@ -27,13 +13,19 @@ const renderInputField = (state) => {
   }
 
   inputField.value = feedForm.value;
-  inputField.disabled = isInputFieldDisabled(state);
+
+  const statesWhenDisabled = ['send', 'duplicate'];
+  inputField.disabled = statesWhenDisabled.includes(feedForm.state);
 };
 
 const renderBtn = (state) => {
+  const { feedForm } = state;
   const form = getForm();
   const btn = form.querySelector('.btn');
-  btn.disabled = isBtnDisabled(state);
+
+  const statesWhenDisabled = ['send', 'duplicate'];
+  btn.disabled =
+    !feedForm.isValid || statesWhenDisabled.includes(feedForm.state);
 };
 
 export default (state) => {
