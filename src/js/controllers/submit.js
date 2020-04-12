@@ -19,11 +19,16 @@ const errorHandler = (state, error) => {
   });
 };
 
-const getFeed = ({ feedForm }) => {
-  const corsAnywhereURL = 'https://cors-anywhere.herokuapp.com/';
-  const url = `${corsAnywhereURL}${feedForm.value}`;
+const addChannel = (state, channel) =>
+  setFeedsState(state, { channels: [...state.feeds.channels, channel] });
+const addItems = (state, items) =>
+  setFeedsState(state, { items: [...state.feeds.items, ...items] });
 
-  return axios.get(url);
+const getFeed = (originURL) => {
+  const corsAnywhereURL = 'https://cors-anywhere.herokuapp.com/';
+  const url = `${corsAnywhereURL}${originURL}`;
+
+  return axios.get(url, { timeout: 10000 });
 };
 
 const parseFeed = (dom) => {
@@ -36,29 +41,71 @@ const parseFeed = (dom) => {
   return feed;
 };
 
-const addFeed = (state, feed, originURL) => {
-  const { feeds } = state;
+const addFeed = (state, feed, originURL, channelId) => {
+  const { items } = feed;
 
   const channel = {
     ...feed.channel,
+    id: channelId,
     originURL,
     isActive: false,
   };
 
-  const { items } = feed;
-  setFeedsState(state, {
-    channels: [...feeds.channels, channel],
-    items: [...feeds.items, ...items],
+  const itemsToAdd = items.map((item) => ({
+    ...item,
+    channelId,
+    id: _.uniqueId(),
+  }));
+
+  addChannel(state, channel);
+  addItems(state, itemsToAdd);
+};
+
+const getNewItems = (newItems, oldItems, keys) =>
+  newItems.filter((item) => {
+    const self = _.find(oldItems, _.pick(item, keys));
+    return _.isUndefined(self);
   });
+
+const updateFeed = (state, channelId) => {
+  const { feeds } = state;
+  const { channels, items } = feeds;
+
+  const channel = _.find(channels, { id: channelId });
+  const { originURL, lastBuildDate } = channel;
+
+  return getFeed(originURL)
+    .then((res) => parseFeed(res.data))
+    .then((feed) => {
+      const { lastBuildDate: newLastBuildDate } = feed.channel;
+
+      if (newLastBuildDate === lastBuildDate) {
+        return;
+      }
+
+      const { items: newItems } = feed;
+      const currentItems = _.filter(items, { channelId });
+      const filtered = getNewItems(newItems, currentItems, ['pubDate']);
+      const itemsToAdd = filtered.map((item) => ({ ...item, channelId }));
+
+      channel.lastBuildDate = newLastBuildDate;
+      addItems(state, itemsToAdd);
+    });
+};
+
+const setAutoUpdate = (state, channelId) => {
+  setTimeout(() => {
+    updateFeed(state, channelId).finally(setAutoUpdate(state, channelId));
+  }, 5000);
 };
 
 export default (event, state) => {
   event.preventDefault();
 
   const { feedForm, feeds } = state;
-  const { value: url } = feedForm;
+  const { value: originURL } = feedForm;
 
-  const isDuplicate = _.some(feeds.channels, { originURL: url });
+  const isDuplicate = _.some(feeds.channels, { originURL });
 
   if (isDuplicate) {
     errorHandler(state, new Error('EDUPLICATE'));
@@ -67,10 +114,15 @@ export default (event, state) => {
 
   lock(state);
 
-  getFeed(state)
+  getFeed(originURL)
     .then((res) => parseFeed(res.data))
-    .then((feed) => addFeed(state, feed, url))
-    .then(() => clear(state))
+    .then((feed) => {
+      const channelId = _.uniqueId();
+
+      addFeed(state, feed, originURL, channelId);
+      setAutoUpdate(state, channelId);
+      clear(state);
+    })
     .catch((error) => errorHandler(state, error))
     .finally(() => unlock(state));
 };

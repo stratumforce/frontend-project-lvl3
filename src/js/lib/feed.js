@@ -25,7 +25,7 @@ const getGuid = (parent) => {
   };
 };
 
-const getChannelHeaders = (channel) => {
+const getChannelContent = (channel) => {
   const headers = filterChildren(channel, (el) => el.tagName !== 'item');
 
   return getElementsContent(headers);
@@ -39,9 +39,8 @@ const getItemContent = (item) => {
   const content = getElementsContent(elements);
 
   return {
-    id: _.uniqueId(),
-    guid: getGuid(item),
     ...content,
+    guid: getGuid(item),
   };
 };
 
@@ -55,15 +54,9 @@ const getItems = (channel) => {
 
 const getData = (dom) => {
   const channelEl = dom.querySelector('channel');
-  const channelHeaders = getChannelHeaders(channelEl);
+  const channel = getChannelContent(channelEl);
 
-  const id = _.uniqueId();
-  const channel = { id, ...channelHeaders };
-
-  const items = getItems(channelEl).map((feed) => ({
-    ...feed,
-    channelId: id,
-  }));
+  const items = getItems(channelEl);
 
   return {
     channel,
