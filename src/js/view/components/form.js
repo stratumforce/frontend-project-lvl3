@@ -2,20 +2,15 @@ import { getForm } from './util';
 
 const renderInputField = (state) => {
   const { feedForm } = state;
+  const { isValid } = feedForm;
 
   const form = getForm();
   const inputField = form.elements.feed;
 
-  if (!feedForm.isValid) {
-    inputField.classList.add('border', 'border-danger');
-  } else {
-    inputField.classList.remove('border', 'border-danger');
-  }
-
+  inputField.classList.toggle('border', !isValid);
+  inputField.classList.toggle('border-danger', !isValid);
   inputField.value = feedForm.value;
-
-  const statesWhenDisabled = ['send', 'duplicate'];
-  inputField.disabled = statesWhenDisabled.includes(feedForm.state);
+  inputField.disabled = feedForm.state === 'send';
 };
 
 const renderBtn = (state) => {
@@ -23,9 +18,10 @@ const renderBtn = (state) => {
   const form = getForm();
   const btn = form.querySelector('.btn');
 
-  const statesWhenDisabled = ['send', 'duplicate'];
-  btn.disabled =
-    !feedForm.isValid || statesWhenDisabled.includes(feedForm.state);
+  const isDisabled =
+    !feedForm.isValid || !feedForm.value || feedForm.state === 'send';
+
+  btn.disabled = isDisabled;
 };
 
 export default (state) => {
