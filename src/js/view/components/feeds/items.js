@@ -2,21 +2,8 @@ import _ from 'lodash';
 
 import { createElement } from '../util';
 
-const getActiveChannelItems = (items, channelId) =>
-  items.filter((item) => item.channelId === channelId);
-
-const getItems = ({ feeds }) => {
-  const { channels } = feeds;
-  const activeChannel = _.find(channels, { isActive: true });
-
-  if (activeChannel === undefined) {
-    return [...feeds.items];
-  }
-
-  const items = getActiveChannelItems(feeds.items, activeChannel.id);
-
-  return items;
-};
+const sortItemsByPubDateDesc = (items) =>
+  items.sort((a, b) => Date.parse(b.pubDate) - Date.parse(a.pubDate));
 
 const createTitle = (content) => {
   const title = createElement('div', 'card-title');
@@ -55,14 +42,14 @@ const createDescription = ({ description: desc }) => {
   return description;
 };
 
-const buildElement = (feed, channel) => {
+const buildItemElement = (item, channel) => {
   const card = createElement('div', 'card');
   const body = createElement('div', 'card-body');
 
-  const link = createLink(feed);
+  const link = createLink(item);
   const title = createTitle(link);
-  const subtitle = createSubtitle(feed, channel);
-  const description = createDescription(feed);
+  const subtitle = createSubtitle(item, channel);
+  const description = createDescription(item);
 
   body.append(title, subtitle, description);
   card.append(body);
@@ -76,10 +63,15 @@ const buildItemsList = (state) => {
 
   const itemsList = createElement('div', 'items-list');
 
-  const items = getItems(state);
-  const elements = items.map((item) => {
+  const activeChannel = _.find(channels, { isActive: true });
+  const items = _.isUndefined(activeChannel)
+    ? [...feeds.items]
+    : _.filter(feeds.items, { channelId: activeChannel.id });
+  const sorted = sortItemsByPubDateDesc(items);
+
+  const elements = sorted.map((item) => {
     const channel = _.find(channels, { id: item.channelId });
-    return buildElement(item, channel);
+    return buildItemElement(item, channel);
   });
 
   itemsList.append(...elements);
