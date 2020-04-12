@@ -1,17 +1,14 @@
-const composeChannels = ({ feeds }, activeChannelId) => {
-  const channels = [...feeds.channels].reduce((acc, channel) => {
-    const isActive = channel.id === activeChannelId;
-
-    return [...acc, { ...channel, isActive }];
-  }, []);
-
-  return channels;
-};
+import { setFeedsState } from '../model/state';
 
 const setActiveChannel = (state, activeChannelId) => {
   const { feeds } = state;
 
-  feeds.channels = composeChannels(state, activeChannelId);
+  const channels = feeds.channels.map((channel) => ({
+    ...channel,
+    isActive: channel.id === activeChannelId,
+  }));
+
+  setFeedsState(state, { channels });
 };
 
 export default (event, state) => {
@@ -19,7 +16,5 @@ export default (event, state) => {
 
   const { channelId } = event.target.dataset;
 
-  if (channelId) {
-    setActiveChannel(state, channelId);
-  }
+  setActiveChannel(state, channelId);
 };
