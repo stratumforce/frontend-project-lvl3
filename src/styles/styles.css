@@ -44,6 +44,10 @@ body {
 }
 
 .card-text {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
   color: var(--secondary-color);
 }
 
