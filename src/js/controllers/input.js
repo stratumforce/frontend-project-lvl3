@@ -1,16 +1,11 @@
-import urlValidation from '../lib/urlValidation';
+import { string } from 'yup';
 
-const validateInput = (state) => {
-  const { feedForm } = state;
-
-  urlValidation(feedForm.value).then((valid) => {
-    feedForm.isValid = valid;
-  });
-};
+const validate = (url) => string().required().url().isValidSync(url);
 
 export default ({ target }, state) => {
   const { feedForm } = state;
+  const { value } = target;
 
-  feedForm.value = target.value;
-  validateInput(state);
+  feedForm.value = value;
+  feedForm.isValid = validate(value);
 };
