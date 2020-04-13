@@ -3,6 +3,15 @@ import _ from 'lodash';
 import { createElement } from '../util';
 import channelLinkHandler from '../../../controllers/channel';
 
+const onClickHandler = (event, state) => {
+  event.preventDefault();
+  const { target } = event;
+
+  if (target.classList.contains('channel-link')) {
+    channelLinkHandler(event, state);
+  }
+};
+
 const composeUnifyingChannel = ({ feeds }) => {
   const { channels } = feeds;
   const unifyingChannel = { title: 'All', id: 0 };
@@ -49,7 +58,7 @@ const buildList = (state) => {
   const elements = channels.map(buildItem);
 
   listGroup.append(...elements);
-  listGroup.addEventListener('click', (e) => channelLinkHandler(e, state));
+  listGroup.addEventListener('click', (event) => onClickHandler(event, state));
 
   return listGroup;
 };

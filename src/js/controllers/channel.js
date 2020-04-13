@@ -12,9 +12,6 @@ const setActiveChannel = (state, activeChannelId) => {
 };
 
 export default (event, state) => {
-  event.preventDefault();
-
   const { channelId } = event.target.dataset;
-
   setActiveChannel(state, channelId);
 };
