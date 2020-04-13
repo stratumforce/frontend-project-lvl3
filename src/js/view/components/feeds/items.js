@@ -17,7 +17,8 @@ const createTitle = (content) => {
 const createSubtitle = ({ pubDate }, { title }) => {
   const subtitle = createElement('div', 'card-subtitle', 'mb-2', 'text-muted');
 
-  subtitle.textContent = `${title} / ${pubDate}`;
+  const date = new Date(pubDate).toString().split(' ').slice(0, 5).join(' ');
+  subtitle.textContent = `${title} / ${date}`;
 
   return subtitle;
 };
