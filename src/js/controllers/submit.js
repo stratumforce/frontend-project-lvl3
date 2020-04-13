@@ -31,16 +31,6 @@ const getFeed = (originURL) => {
   return axios.get(url, { timeout: 10000 });
 };
 
-const parseFeed = (dom) => {
-  const feed = parse(dom);
-
-  if (!feed) {
-    throw new Error('EPARSERERROR');
-  }
-
-  return feed;
-};
-
 const addFeed = (state, feed, originURL, channelId) => {
   const { items } = feed;
 
@@ -61,41 +51,56 @@ const addFeed = (state, feed, originURL, channelId) => {
   addItems(state, itemsToAdd);
 };
 
-const getNewItems = (newItems, oldItems, keys) =>
-  newItems.filter((item) => {
-    const self = _.find(oldItems, _.pick(item, keys));
+const updateChannel = (state, channel, newState) => {
+  const { channels } = state.feeds;
+
+  const otherChannels = _.reject(channels, { id: channel.id });
+  const updatedChannel = { ...channel, ...newState };
+
+  setFeedsState(state, { channels: [...otherChannels, updatedChannel] });
+};
+
+const getNewItems = (items, oldItems) =>
+  items.filter((item) => {
+    const entries = _.pick(item, ['pubDate']);
+    const self = _.find(oldItems, entries);
+
     return _.isUndefined(self);
   });
 
+const addNewItems = (state, feed, channel) => {
+  const { items } = state.feeds;
+  const { id: channelId, lastBuildDate } = channel;
+  const { lastBuildDate: newLastBuildDate } = feed.channel;
+
+  if (newLastBuildDate === lastBuildDate) {
+    return;
+  }
+
+  const currentItems = _.filter(items, { channelId });
+  const newItems = getNewItems(feed.items, currentItems, ['pubDate']);
+  const itemsToAdd = newItems.map((item) => ({ ...item, channelId }));
+
+  updateChannel(state, channel, { lastBuildDate: newLastBuildDate });
+  addItems(state, itemsToAdd);
+};
+
 const updateFeed = (state, channelId) => {
-  const { feeds } = state;
-  const { channels, items } = feeds;
+  const { channels } = state.feeds;
 
   const channel = _.find(channels, { id: channelId });
-  const { originURL, lastBuildDate } = channel;
+  const { originURL } = channel;
 
   return getFeed(originURL)
-    .then((res) => parseFeed(res.data))
-    .then((feed) => {
-      const { lastBuildDate: newLastBuildDate } = feed.channel;
-
-      if (newLastBuildDate === lastBuildDate) {
-        return;
-      }
-
-      const { items: newItems } = feed;
-      const currentItems = _.filter(items, { channelId });
-      const filtered = getNewItems(newItems, currentItems, ['pubDate']);
-      const itemsToAdd = filtered.map((item) => ({ ...item, channelId }));
-
-      channel.lastBuildDate = newLastBuildDate;
-      addItems(state, itemsToAdd);
-    });
+    .then((res) => parse(res.data))
+    .then((feed) => addNewItems(state, feed, channel));
 };
 
 const setAutoUpdate = (state, channelId) => {
   setTimeout(() => {
-    updateFeed(state, channelId).finally(setAutoUpdate(state, channelId));
+    updateFeed(state, channelId)
+      .catch(_.noop)
+      .finally(setAutoUpdate(state, channelId));
   }, 5000);
 };
 
@@ -115,7 +120,7 @@ export default (event, state) => {
   lock(state);
 
   getFeed(originURL)
-    .then((res) => parseFeed(res.data))
+    .then((res) => parse(res.data))
     .then((feed) => {
       const channelId = _.uniqueId();
 

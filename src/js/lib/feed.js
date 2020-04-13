@@ -69,7 +69,7 @@ export default (dom) => {
   const content = parser.parseFromString(dom, 'application/xml');
 
   if (content.querySelector('parsererror')) {
-    return null;
+    throw new Error('EPARSERERROR');
   }
 
   return getData(content);
