@@ -26,9 +26,9 @@ const getGuid = (parent) => {
 };
 
 const getChannelContent = (channel) => {
-  const headers = filterChildren(channel, (el) => el.tagName !== 'item');
+  const elements = filterChildren(channel, (el) => el.tagName !== 'item');
 
-  return getElementsContent(headers);
+  return getElementsContent(elements);
 };
 
 const getItemContent = (item) => {
