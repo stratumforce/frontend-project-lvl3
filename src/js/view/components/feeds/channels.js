@@ -23,8 +23,13 @@ const composeUnifyingChannel = ({ feeds }) => {
   return unifyingChannel;
 };
 
-const buildLink = ({ id, title }) => {
-  const link = createElement('a', 'channel-link');
+const buildLink = ({ id, title, isActive }) => {
+  const utilityClasses = isActive
+    ? ['font-weight-bold', 'text-dark']
+    : ['text-secondary'];
+
+  const classes = ['channel-link', 'text-decoration-none', ...utilityClasses];
+  const link = createElement('a', ...classes);
 
   link.dataset.channelId = id;
   link.href = '#';
@@ -35,7 +40,12 @@ const buildLink = ({ id, title }) => {
 };
 
 const buildItem = (channel) => {
-  const item = createElement('li', 'list-group-item', 'channel');
+  const item = createElement(
+    'li',
+    'list-group-item',
+    'channel',
+    'text-truncate'
+  );
   item.classList.toggle('channel-active', channel.isActive);
 
   const link = buildLink(channel);
@@ -49,9 +59,10 @@ const buildList = (state) => {
 
   const unifyingChannel = composeUnifyingChannel(state);
   const channels = [unifyingChannel, ...feeds.channels];
+  const sortedChannels = _.sortBy(channels, ['id']);
+  const elements = sortedChannels.map(buildItem);
 
   const listGroup = createElement('ul', 'list-group');
-  const elements = channels.map(buildItem);
   listGroup.append(...elements);
   listGroup.addEventListener('click', (event) => onClickHandler(event, state));
 

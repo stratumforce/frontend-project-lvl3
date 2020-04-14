@@ -5,17 +5,16 @@ import { createElement } from '../util';
 const sortItemsByPubDateDesc = (items) =>
   items.sort((a, b) => Date.parse(b.pubDate) - Date.parse(a.pubDate));
 
-const createTitle = (content) => {
-  const title = createElement('div', 'card-title');
-
-  title.innerHTML = `<strong></strong>`;
-  title.firstChild.append(content);
+const buildTitle = (content) => {
+  const title = createElement('div', 'card-title', 'font-weight-bold');
+  title.append(content);
 
   return title;
 };
 
-const createSubtitle = ({ pubDate }, { title }) => {
-  const subtitle = createElement('div', 'card-subtitle', 'mb-2', 'text-muted');
+const buildSubtitle = ({ pubDate }, { title }) => {
+  const classes = ['card-subtitle', 'mb-2', 'text-muted', 'small'];
+  const subtitle = createElement('div', ...classes);
 
   const date = new Date(pubDate).toString().split(' ').slice(0, 5).join(' ');
   subtitle.textContent = `${title} / ${date}`;
@@ -23,8 +22,15 @@ const createSubtitle = ({ pubDate }, { title }) => {
   return subtitle;
 };
 
-const createLink = ({ title, guid, link: url }) => {
-  const link = createElement('a', 'item-link');
+const buildLink = ({ title, guid, link: url }) => {
+  const classes = [
+    'item-link',
+    'text-dark',
+    'font-weight-bold',
+    'text-decoration-none',
+  ];
+
+  const link = createElement('a', ...classes);
   const href = guid.isPermaLink ? guid.link : url;
 
   link.href = href;
@@ -35,9 +41,8 @@ const createLink = ({ title, guid, link: url }) => {
   return link;
 };
 
-const createDescription = ({ description: desc }) => {
-  const description = createElement('p', 'card-text');
-
+const buildDescription = ({ description: desc }) => {
+  const description = createElement('p', 'card-text', 'clamp');
   description.textContent = desc;
 
   return description;
@@ -47,10 +52,10 @@ const buildItemElement = (item, channel) => {
   const card = createElement('div', 'card');
   const body = createElement('div', 'card-body');
 
-  const link = createLink(item);
-  const title = createTitle(link);
-  const subtitle = createSubtitle(item, channel);
-  const description = createDescription(item);
+  const link = buildLink(item);
+  const title = buildTitle(link);
+  const subtitle = buildSubtitle(item, channel);
+  const description = buildDescription(item);
 
   body.append(title, subtitle, description);
   card.append(body);
@@ -68,9 +73,9 @@ const buildItemsList = (state) => {
   const items = _.isUndefined(activeChannel)
     ? [...feeds.items]
     : _.filter(feeds.items, { channelId: activeChannel.id });
-  const sorted = sortItemsByPubDateDesc(items);
+  const sortedItems = sortItemsByPubDateDesc(items);
 
-  const elements = sorted.map((item) => {
+  const elements = sortedItems.map((item) => {
     const channel = _.find(channels, { id: item.channelId });
     return buildItemElement(item, channel);
   });

@@ -1,65 +1,10 @@
-:root {
-  --primary-color: #ffcc66;
-  --secondary-color: #1f2430;
-  --link-hover-color: #3c526a;
-  --item-bg-color: #ffe6b3;
-}
-
-body {
-  background-color: var(--secondary-color);
-}
-
 .cursor-default {
   cursor: default;
 }
 
-.jumbotron {
-  background-color: var(--secondary-color);
-  color: var(--primary-color);
-}
-
-.channels .list-group-item {
-  background-color: var(--primary-color);
-}
-
-.channel-active .channel-link {
-  font-weight: 700;
-}
-
-.channel-link {
-  display: block;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  color: var(--secondary-color);
-}
-
-.channel-link:hover {
-  color: var(--link-hover-color);
-  text-decoration: none;
-}
-
-.card {
-  background-color: var(--item-bg-color);
-}
-
-.card-text {
+.clamp {
   display: -webkit-box;
   overflow: hidden;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
-  color: var(--secondary-color);
-}
-
-.card-subtitle {
-  font-size: 0.8rem;
-}
-
-.item-link {
-  color: var(--secondary-color);
-}
-
-.item-link:hover {
-  color: var(--link-hover-color);
-  text-decoration: none;
 }
