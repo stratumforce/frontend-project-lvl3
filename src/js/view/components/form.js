@@ -1,27 +1,35 @@
+import _ from 'lodash';
+
 import { getForm } from './util';
 
 const renderInputField = (state) => {
   const { feedForm } = state;
-  const { isValid } = feedForm;
+
+  const isInvalid = _.eq(feedForm.isValid, false);
 
   const form = getForm();
   const inputField = form.elements.feed;
 
-  inputField.classList.toggle('border', !isValid);
-  inputField.classList.toggle('border-danger', !isValid);
+  inputField.classList.toggle('border', isInvalid);
+  inputField.classList.toggle('border-danger', isInvalid);
+
   inputField.value = feedForm.value;
-  inputField.disabled = feedForm.state === 'send';
+  inputField.disabled = _.eq(feedForm.state, 'send');
 };
 
 const renderBtn = (state) => {
   const { feedForm } = state;
-  const form = getForm();
-  const btn = form.querySelector('.btn');
 
+  const isSending = _.eq(feedForm.state, 'send');
   const isDisabled =
-    !feedForm.isValid || !feedForm.value || feedForm.state === 'send';
+    _.eq(feedForm.isValid, false) || _.isEmpty(feedForm.value) || isSending;
 
-  btn.disabled = isDisabled;
+  const form = getForm();
+  const button = form.querySelector('.btn');
+  button.disabled = isDisabled;
+
+  const spinner = button.querySelector('.spinner');
+  spinner.hidden = _.eq(isSending, false);
 };
 
 export default (state) => {
