@@ -1,4 +1,5 @@
+import channelController from './channel';
 import inputController from './input';
 import submitController from './submit';
 
-export { inputController, submitController };
+export { channelController, inputController, submitController };

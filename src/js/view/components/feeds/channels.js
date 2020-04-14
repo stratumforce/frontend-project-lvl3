@@ -1,14 +1,15 @@
 import _ from 'lodash';
 
 import { createElement } from '../util';
-import channelLinkHandler from '../../../controllers/channel';
+import { channelController } from '../../../controllers';
 
 const onClickHandler = (event, state) => {
   event.preventDefault();
   const { target } = event;
 
-  if (target.classList.contains('channel-link')) {
-    channelLinkHandler(event, state);
+  const isLinkElement = target.classList.contains('channel-link');
+  if (isLinkElement) {
+    channelController(event, state);
   }
 };
 
