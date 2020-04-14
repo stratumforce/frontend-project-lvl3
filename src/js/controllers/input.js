@@ -1,11 +1,12 @@
 import { string } from 'yup';
 
+import { setFormState } from '../model/state';
+
 const validate = (url) => string().required().url().isValidSync(url);
 
 export default ({ target }, state) => {
-  const { feedForm } = state;
   const { value } = target;
 
-  feedForm.value = value;
-  feedForm.isValid = validate(value);
+  const isValid = validate(value);
+  setFormState(state, { value, isValid });
 };
