@@ -60,15 +60,14 @@ const updateChannel = (state, channel, newState) => {
   setFeedsState(state, { channels: [...otherChannels, updatedChannel] });
 };
 
-const getNewItems = (items, oldItems) =>
-  items.filter((item) => {
-    const entries = _.pick(item, ['pubDate']);
-    const self = _.find(oldItems, entries);
+const filterNewItems = (items, oldItems) =>
+  items.filter(({ pubDate }) => {
+    const self = _.find(oldItems, { pubDate });
 
     return _.isUndefined(self);
   });
 
-const addNewItems = (state, feed, channel) => {
+const updateFeed = (state, feed, channel) => {
   const { items } = state.feeds;
   const { id: channelId, lastBuildDate } = channel;
   const { lastBuildDate: newLastBuildDate } = feed.channel;
@@ -77,30 +76,26 @@ const addNewItems = (state, feed, channel) => {
     return;
   }
 
-  const currentItems = _.filter(items, { channelId });
-  const newItems = getNewItems(feed.items, currentItems, ['pubDate']);
+  const oldItems = _.filter(items, { channelId });
+  const newItems = filterNewItems(feed.items, oldItems);
   const itemsToAdd = newItems.map((item) => ({ ...item, channelId }));
 
   updateChannel(state, channel, { lastBuildDate: newLastBuildDate });
   addItems(state, itemsToAdd);
 };
 
-const updateFeed = (state, channelId) => {
+const setAutoUpdate = (state, channelId) => {
   const { channels } = state.feeds;
 
   const channel = _.find(channels, { id: channelId });
   const { originURL } = channel;
 
-  return getFeed(originURL)
-    .then((res) => parse(res.data))
-    .then((feed) => addNewItems(state, feed, channel));
-};
-
-const setAutoUpdate = (state, channelId) => {
   setTimeout(() => {
-    updateFeed(state, channelId)
+    getFeed(originURL)
+      .then((res) => parse(res.data))
+      .then((feed) => updateFeed(state, feed, channel))
       .catch(_.noop)
-      .finally(setAutoUpdate(state, channelId));
+      .finally(() => setAutoUpdate(state, channelId));
   }, 5000);
 };
 
