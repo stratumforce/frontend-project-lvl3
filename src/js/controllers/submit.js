@@ -5,6 +5,8 @@ import { setFormState, setFeedsState } from '../model/state';
 
 import parse from '../lib/feed';
 
+const getChannelById = (channels, id) => _.find(channels, { id });
+
 const lock = (state) => setFormState(state, { state: 'send' });
 const unlock = (state) => setFormState(state, { state: 'input' });
 const invalidate = (state) => setFormState(state, { isValid: false });
@@ -67,9 +69,12 @@ const filterNewItems = (items, oldItems) =>
     return _.isUndefined(self);
   });
 
-const updateFeed = (state, feed, channel) => {
-  const { items } = state.feeds;
-  const { id: channelId, lastBuildDate } = channel;
+const updateFeed = (state, feed, channelId) => {
+  const { feeds } = state;
+  const { channels, items } = feeds;
+
+  const channel = getChannelById(channels, channelId);
+  const { lastBuildDate } = channel;
   const { lastBuildDate: newLastBuildDate } = feed.channel;
 
   if (newLastBuildDate === lastBuildDate) {
@@ -87,13 +92,13 @@ const updateFeed = (state, feed, channel) => {
 const setAutoUpdate = (state, channelId) => {
   const { channels } = state.feeds;
 
-  const channel = _.find(channels, { id: channelId });
+  const channel = getChannelById(channels, channelId);
   const { originURL } = channel;
 
   setTimeout(() => {
     getFeed(originURL)
       .then((res) => parse(res.data))
-      .then((feed) => updateFeed(state, feed, channel))
+      .then((feed) => updateFeed(state, feed, channelId))
       .catch(_.noop)
       .finally(() => setAutoUpdate(state, channelId));
   }, 5000);
