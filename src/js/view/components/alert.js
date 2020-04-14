@@ -1,9 +1,10 @@
+import _ from 'lodash';
 import $ from 'jquery';
 import i18next from 'i18next';
 
 import { createElement, getForm } from './util';
 
-const buildDismissibleBtn = () => {
+const buildDismissBtn = () => {
   const button = createElement('button', 'close');
   button.setAttribute('type', 'button');
   button.setAttribute('aria-label', 'Close');
@@ -18,22 +19,22 @@ const buildDismissibleBtn = () => {
   return button;
 };
 
-const wrap = (alertEl) => {
-  const row = createElement('div', 'row');
-  const col = createElement('div', 'col');
+const wrap = (child) => {
+  const wrapper = createElement('div', 'row');
+  const childContainer = createElement('div', 'col');
 
-  col.append(alertEl);
-  row.append(col);
+  childContainer.append(child);
+  wrapper.append(childContainer);
 
-  const destroyWrapper = (_, observer) => {
-    row.remove();
+  const destroy = (_unused, observer) => {
+    wrapper.remove();
     observer.disconnect();
   };
 
-  const observer = new MutationObserver(destroyWrapper);
-  observer.observe(col, { childList: true });
+  const observer = new MutationObserver(destroy);
+  observer.observe(childContainer, { childList: true });
 
-  return row;
+  return wrapper;
 };
 
 const buildAlert = (msg) => {
@@ -49,12 +50,12 @@ const buildAlert = (msg) => {
   alertEl.setAttribute('role', 'alert');
   alertEl.textContent = msg;
 
-  const btn = buildDismissibleBtn();
+  const btn = buildDismissBtn();
   alertEl.append(btn);
 
-  const wrappedAlertEl = wrap(alertEl);
+  const wrapped = wrap(alertEl);
 
-  return wrappedAlertEl;
+  return wrapped;
 };
 
 const removeAlert = (alertEl) => {
@@ -62,13 +63,13 @@ const removeAlert = (alertEl) => {
 };
 
 const getErrorMessage = (error) => {
-  const errorPath = 'feedForm.errors.';
+  const path = 'feedForm.errors.';
 
   const msg = i18next.t([
-    `${errorPath}${error.code}`,
-    `${errorPath}${error.response && error.response.status}`,
-    `${errorPath}${error.message}`,
-    `${errorPath}default`,
+    `${path}${error.code}`,
+    `${path}${_.get(error, 'reponse.status')}`,
+    `${path}${error.message}`,
+    `${path}default`,
   ]);
 
   return msg;
@@ -84,10 +85,4 @@ const showAlert = (error) => {
   parent.append(alertEl);
 };
 
-export default (state) => {
-  const { error } = state.feedForm;
-
-  if (error) {
-    showAlert(error);
-  }
-};
+export default (state) => showAlert(state.feedForm.error);
