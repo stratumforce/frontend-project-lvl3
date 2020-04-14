@@ -14,10 +14,10 @@ const onClickHandler = (event, state) => {
 
 const composeUnifyingChannel = ({ feeds }) => {
   const { channels } = feeds;
-  const unifyingChannel = { title: 'All', id: 0 };
 
-  const isThereAnyActiveChannel = _.some(channels, { isActive: true });
-  unifyingChannel.isActive = !isThereAnyActiveChannel;
+  const unifyingChannel = { title: 'All', id: 0 };
+  const isActive = _.every(channels, { isActive: false });
+  unifyingChannel.isActive = isActive;
 
   return unifyingChannel;
 };
@@ -35,13 +35,9 @@ const buildLink = ({ id, title }) => {
 
 const buildItem = (channel) => {
   const item = createElement('li', 'list-group-item', 'channel');
-
-  if (channel.isActive) {
-    item.classList.add('channel-active');
-  }
+  item.classList.toggle('channel-active', channel.isActive);
 
   const link = buildLink(channel);
-
   item.append(link);
 
   return item;
@@ -50,13 +46,11 @@ const buildItem = (channel) => {
 const buildList = (state) => {
   const { feeds } = state;
 
-  const listGroup = createElement('ul', 'list-group');
-
   const unifyingChannel = composeUnifyingChannel(state);
   const channels = [unifyingChannel, ...feeds.channels];
 
+  const listGroup = createElement('ul', 'list-group');
   const elements = channels.map(buildItem);
-
   listGroup.append(...elements);
   listGroup.addEventListener('click', (event) => onClickHandler(event, state));
 
