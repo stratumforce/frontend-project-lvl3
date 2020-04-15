@@ -26,6 +26,13 @@ const addChannel = (state, channel) =>
 const addItems = (state, items) =>
   setFeedsState(state, { items: [...state.feeds.items, ...items] });
 
+const setItemsId = (items, channelId) =>
+  items.map((item) => ({
+    ...item,
+    channelId,
+    id: _.uniqueId(),
+  }));
+
 const getFeed = (originURL) => {
   const corsAnywhereURL = 'https://cors-anywhere.herokuapp.com/';
   const url = `${corsAnywhereURL}${originURL}`;
@@ -34,8 +41,6 @@ const getFeed = (originURL) => {
 };
 
 const addFeed = (state, feed, originURL, channelId) => {
-  const { items } = feed;
-
   const channel = {
     ...feed.channel,
     id: channelId,
@@ -43,11 +48,7 @@ const addFeed = (state, feed, originURL, channelId) => {
     isActive: false,
   };
 
-  const itemsToAdd = items.map((item) => ({
-    ...item,
-    channelId,
-    id: _.uniqueId(),
-  }));
+  const itemsToAdd = setItemsId(feed.items, channelId);
 
   addChannel(state, channel);
   addItems(state, itemsToAdd);
@@ -83,7 +84,7 @@ const updateFeed = (state, feed, channelId) => {
 
   const oldItems = _.filter(items, { channelId });
   const newItems = filterNewItems(feed.items, oldItems);
-  const itemsToAdd = newItems.map((item) => ({ ...item, channelId }));
+  const itemsToAdd = setItemsId(newItems, channelId);
 
   updateChannel(state, channel, { lastBuildDate: newLastBuildDate });
   addItems(state, itemsToAdd);
