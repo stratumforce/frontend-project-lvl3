@@ -1,10 +1,19 @@
+import { watch } from 'melanke-watchjs';
 import i18next from 'i18next';
 import resources from './locales';
 
-import initialState from './model/state';
-import runWatchers from './view/watchers';
-import { getForm } from './view/components/util';
 import { inputController, submitController } from './controllers';
+import render, { getForm } from './view';
+
+const runWatchers = (state) => {
+  watch(state, 'form', (prop) => {
+    if (prop !== 'error') {
+      render(state, 'form');
+    }
+  });
+  watch(state.form, 'error', () => render(state, 'alert'));
+  watch(state, 'feeds', () => render(state, 'feeds'));
+};
 
 const setEvents = (state) => {
   const form = getForm();
@@ -14,10 +23,24 @@ const setEvents = (state) => {
 };
 
 export default () => {
-  const state = initialState;
+  const state = {
+    app: {
+      lang: 'en',
+    },
+    form: {
+      state: 'input',
+      isValid: false,
+      value: '',
+      error: '',
+    },
+    feeds: {
+      channels: [],
+      items: [],
+    },
+  };
 
   i18next.init({
-    lng: 'en',
+    lng: state.app.lang,
     resources,
   });
 

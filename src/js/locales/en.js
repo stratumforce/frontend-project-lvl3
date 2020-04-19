@@ -1,6 +1,6 @@
 export default {
   translation: {
-    feedForm: {
+    form: {
       errors: {
         default:
           'Oops! Something just happened. Please check your input and internet connection and try again',
