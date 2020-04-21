@@ -32,10 +32,10 @@ const renderAlert = (state) => {
   button.setAttribute('type', 'button');
   button.setAttribute('aria-label', 'Close');
   button.dataset.dismiss = 'alert';
-  const span = document.createElement('span');
-  span.setAttribute('aria-hidden', 'true');
-  span.innerHTML = '&times;';
-  button.append(span);
+  const timesSign = document.createElement('span');
+  timesSign.setAttribute('aria-hidden', 'true');
+  timesSign.innerHTML = '&times;';
+  button.append(timesSign);
   alertEl.append(button);
 
   setTimeout(() => {
@@ -60,19 +60,19 @@ const renderFeeds = (state) => {
   const sortedChannels = _.sortBy(channels, ['id']);
   const channelsElements = sortedChannels.map((channel) => {
     const { id, isActive, title } = channel;
-    const element = document.createElement('li');
-    element.classList.add('list-group-item', 'channel', 'text-truncate');
-    const link = document.createElement('a');
-    link.classList.add('channel-link', 'text-decoration-none');
-    link.classList.toggle('font-weight-bold', isActive);
-    link.classList.toggle('text-dark', isActive);
-    link.classList.toggle('text-secondary', !isActive);
-    link.dataset.channelId = id;
-    link.href = '#';
-    link.textContent = title;
-    link.setAttribute('title', title);
-    element.append(link);
-    return element;
+    const channelEl = document.createElement('li');
+    channelEl.classList.add('list-group-item', 'channel', 'text-truncate');
+    const linkEl = document.createElement('a');
+    linkEl.classList.add('channel-link', 'text-decoration-none');
+    linkEl.classList.toggle('font-weight-bold', isActive);
+    linkEl.classList.toggle('text-dark', isActive);
+    linkEl.classList.toggle('text-secondary', !isActive);
+    linkEl.dataset.channelId = id;
+    linkEl.href = '#';
+    linkEl.textContent = title;
+    linkEl.setAttribute('title', title);
+    channelEl.append(linkEl);
+    return channelEl;
   });
   const channelsList = document.createElement('ul');
   channelsList.classList.add('list-group');
@@ -105,8 +105,7 @@ const renderFeeds = (state) => {
       'font-weight-bold',
       'text-decoration-none'
     );
-    const href = link;
-    linkEl.href = href;
+    linkEl.href = link;
     linkEl.textContent = title;
     linkEl.setAttribute('title', title);
     linkEl.setAttribute('target', '_blank');
@@ -122,13 +121,13 @@ const renderFeeds = (state) => {
     descriptionEl.classList.add('card-text');
     descriptionEl.textContent = description;
 
-    const card = document.createElement('div');
-    card.classList.add('card');
-    const body = document.createElement('div');
-    body.classList.add('card-body');
-    body.append(titleEl, subtitleEl, descriptionEl);
-    card.append(body);
-    return card;
+    const cardEl = document.createElement('div');
+    cardEl.classList.add('card');
+    const cardBody = document.createElement('div');
+    cardBody.classList.add('card-body');
+    cardBody.append(titleEl, subtitleEl, descriptionEl);
+    cardEl.append(cardBody);
+    return cardEl;
   });
   const itemsList = document.createElement('div');
   itemsList.classList.add('items-list');
