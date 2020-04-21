@@ -38,21 +38,6 @@ const renderAlert = (state) => {
   button.append(span);
   alertEl.append(button);
 
-  const wrapper = document.createElement('div');
-  wrapper.classList.add('row');
-  const childContainer = document.createElement('div');
-  childContainer.classList.add('col');
-  childContainer.append(alertEl);
-  wrapper.append(childContainer);
-
-  const destroyWrapper = (_unused, observer) => {
-    wrapper.remove();
-    observer.disconnect();
-  };
-
-  const observer = new MutationObserver(destroyWrapper);
-  observer.observe(childContainer, { childList: true });
-
   setTimeout(() => {
     $(alertEl).alert('close');
   }, 3000);
