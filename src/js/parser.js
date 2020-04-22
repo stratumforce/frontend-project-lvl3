@@ -1,11 +1,3 @@
-import _ from 'lodash';
-
-const composeIntoObject = (elements) =>
-  _.chain(elements)
-    .map((el) => [el.tagName, el.textContent.trim()])
-    .fromPairs()
-    .value();
-
 export default (data) => {
   const parser = new DOMParser();
   const dom = parser.parseFromString(data, 'application/xml');
@@ -15,14 +7,17 @@ export default (data) => {
   }
 
   const channelEl = dom.querySelector('channel');
-  const [itemsElements, headers] = _.partition([...channelEl.children], {
-    tagName: 'item',
-  });
-
-  const channel = composeIntoObject(headers);
-  const items = itemsElements.map((item) =>
-    composeIntoObject([...item.children])
-  );
+  const channel = [...channelEl.children]
+    .filter((el) => el.tagName !== 'item')
+    .reduce((acc, el) => ({ ...acc, [el.tagName]: el.textContent.trim() }), {});
+  const items = [...channelEl.children]
+    .filter((el) => el.tagName === 'item')
+    .map((item) =>
+      [...item.children].reduce(
+        (acc, el) => ({ ...acc, [el.tagName]: el.textContent.trim() }),
+        {}
+      )
+    );
 
   return {
     channel,
