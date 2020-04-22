@@ -39,7 +39,7 @@ const updateFeed = (state, url) => {
     .then((res) => parse(res.data))
     .then((feed) => {
       const { feeds } = state;
-      const { channels, items } = feeds;
+      const { channels, posts } = feeds;
       const channel = channels.find(({ originURL }) => originURL === url);
 
       if (channel.lastBuildDate === feed.channel.lastBuildDate) {
@@ -48,30 +48,30 @@ const updateFeed = (state, url) => {
 
       channel.lastBuildDate = feed.channel.lastBuildDate;
 
-      const oldItems = items.filter(
+      const oldPosts = posts.filter(
         ({ channelId }) => channelId === channel.id
       );
-      const newItems = feed.items.filter(
-        (item) => !oldItems.find((oldItem) => oldItem.pubDate === item.pubDate)
+      const newPosts = feed.items.filter(
+        (post) => !oldPosts.find((oldPost) => oldPost.pubDate === post.pubDate)
       );
-      const itemsToAdd = [...newItems].map((item) => ({
-        ...item,
+      const postsToAdd = [...newPosts].map((post) => ({
+        ...post,
         channelId: channel.id,
         id: _.uniqueId(),
       }));
-      feeds.items.unshift(...itemsToAdd);
+      feeds.posts.unshift(...postsToAdd);
     })
     .catch(_.noop)
     .finally(() => setTimeout(() => updateFeed(state, url), 5000));
 };
 
-export const inputHandler = ({ target }, state) => {
+export const handleInput = ({ target }, state) => {
   const { form } = state;
   form.value = target.value;
   form.isValid = validate(state, form.value);
 };
 
-export const submitHandler = (event, state) => {
+export const handleSubmit = (event, state) => {
   event.preventDefault();
   const { form, feeds } = state;
   const { value: url } = form;
@@ -85,13 +85,13 @@ export const submitHandler = (event, state) => {
         id: channelId,
         originURL: url,
       };
-      const items = [...feed.items].map((item) => ({
-        ...item,
+      const posts = feed.items.map((post) => ({
+        ...post,
         channelId,
         id: _.uniqueId(),
       }));
       feeds.channels.push(channel);
-      feeds.items.unshift(...items);
+      feeds.posts.unshift(...posts);
       form.value = '';
       setTimeout(() => updateFeed(state, url), 5000);
     })

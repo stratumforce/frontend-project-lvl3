@@ -45,11 +45,10 @@ const renderAlert = (state) => {
 };
 
 const renderFeeds = (state) => {
-  const { feeds } = state;
-  const { items } = feeds;
+  const { posts } = state.feeds;
 
-  const posts = items.map((item) => {
-    const { link, title } = item;
+  const links = posts.map((post) => {
+    const { link, title } = post;
     const linkEl = document.createElement('a');
     linkEl.href = link;
     linkEl.textContent = title;
@@ -61,7 +60,7 @@ const renderFeeds = (state) => {
 
   const parent = document.querySelector('.posts');
   parent.innerHTML = '';
-  parent.append(...posts);
+  parent.append(...links);
 };
 
 const renderForm = (state) => {
