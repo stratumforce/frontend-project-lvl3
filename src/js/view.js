@@ -2,7 +2,7 @@ import _ from 'lodash';
 import $ from 'jquery';
 import i18next from 'i18next';
 
-import { channelController } from './controllers';
+import { channelClickHandler } from './controllers';
 
 export const getForm = () => document.forms['frm-feed'];
 
@@ -48,18 +48,17 @@ const renderAlert = (state) => {
 
 const renderFeeds = (state) => {
   const { feeds } = state;
-  const activeChannel = _.find(feeds.channels, { isActive: true });
-  const isAllChannelsInactive = _.isUndefined(activeChannel);
+  const { activeChannelId } = feeds;
 
   const unifyingChannel = {
-    id: 0,
-    isActive: isAllChannelsInactive,
+    id: '0',
     title: i18next.t('feeds.channels.unifyingChannel'),
   };
   const channels = [unifyingChannel, ...feeds.channels];
   const sortedChannels = _.sortBy(channels, ['id']);
   const channelsElements = sortedChannels.map((channel) => {
-    const { id, isActive, title } = channel;
+    const { id, title } = channel;
+    const isActive = id === activeChannelId;
     const channelEl = document.createElement('li');
     channelEl.classList.add('list-group-item', 'channel', 'text-truncate');
     const linkEl = document.createElement('a');
@@ -81,7 +80,7 @@ const renderFeeds = (state) => {
     event.preventDefault();
     const isLinkElement = event.target.classList.contains('channel-link');
     if (isLinkElement) {
-      channelController(event, state);
+      channelClickHandler(event, state);
     }
   });
 
@@ -89,12 +88,11 @@ const renderFeeds = (state) => {
   channelsParent.innerHTML = '';
   channelsParent.append(channelsList);
 
-  const items = isAllChannelsInactive
-    ? [...feeds.items]
-    : _.filter(feeds.items, { channelId: activeChannel.id });
-  const sortedItems = isAllChannelsInactive
-    ? _.sortBy(items, ({ pubDate }) => Date.parse(pubDate))
-    : _.sortBy(items, ({ id }) => parseInt(id, 10));
+  const items =
+    activeChannelId > 0
+      ? _.filter(feeds.items, { channelId: activeChannelId })
+      : [...feeds.items];
+  const sortedItems = _.sortBy(items, ({ pubDate }) => Date.parse(pubDate));
   const itemsElements = [...sortedItems].reverse().map((item) => {
     const { channelId, description, link, pubDate, title } = item;
 

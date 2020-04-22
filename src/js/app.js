@@ -2,7 +2,7 @@ import { watch } from 'melanke-watchjs';
 import i18next from 'i18next';
 import resources from './locales';
 
-import { inputController, submitController } from './controllers';
+import { inputHandler, submitHandler } from './controllers';
 import render, { getForm } from './view';
 
 const runWatchers = (state) => {
@@ -18,8 +18,8 @@ const runWatchers = (state) => {
 const setEvents = (state) => {
   const form = getForm();
 
-  form.addEventListener('submit', (event) => submitController(event, state));
-  form.addEventListener('input', (event) => inputController(event, state));
+  form.addEventListener('submit', (event) => submitHandler(event, state));
+  form.addEventListener('input', (event) => inputHandler(event, state));
 };
 
 export default () => {
@@ -34,6 +34,7 @@ export default () => {
       error: '',
     },
     feeds: {
+      activeChannelId: '0',
       channels: [],
       items: [],
     },

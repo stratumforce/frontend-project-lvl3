@@ -4,17 +4,27 @@ import { string } from 'yup';
 
 import parse from './parser';
 
-const setFormState = (state, newState) => _.assign(state.form, newState);
-const setFeedsState = (state, newState) => _.assign(state.feeds, newState);
-
-const validate = (url) => string().required().url().isValidSync(url);
-
 const errorHandler = (state, error) => {
-  setFormState(state, {
-    isValid: false,
-    state: 'input',
-    error,
-  });
+  const { form } = state;
+  form.isValid = false;
+  form.state = 'input';
+  form.error = error;
+};
+
+const validate = (state, url) => {
+  const isValidURL = string().required().url().isValidSync(url);
+  if (!isValidURL) {
+    return false;
+  }
+
+  const { channels } = state.feeds;
+  const isDuplicate = channels.some(({ originURL }) => originURL === url);
+  if (isDuplicate) {
+    errorHandler(state, new Error('EDUPLICATE'));
+    return false;
+  }
+
+  return true;
 };
 
 const getFeed = (originURL) => {
@@ -28,69 +38,48 @@ const updateFeed = (state, url) => {
   getFeed(url)
     .then((res) => parse(res.data))
     .then((feed) => {
-      const { channels, items } = state.feeds;
-      const channel = _.find(channels, { originURL: url });
+      const { feeds } = state;
+      const { channels, items } = feeds;
+      const channel = channels.find(({ originURL }) => originURL === url);
 
       if (channel.lastBuildDate === feed.channel.lastBuildDate) {
         return;
       }
 
-      const otherChannels = _.reject(channels, { id: channel.id });
-      const updatedChannel = {
-        ...channel,
-        lastBuildDate: feed.channel.lastBuildDate,
-      };
+      channel.lastBuildDate = feed.channel.lastBuildDate;
 
-      const oldItems = _.filter(items, { channelId: channel.id });
-      const newItems = _.chain([...feed.items])
-        .differenceBy(oldItems, 'pubDate')
+      const oldItems = items.filter(
+        ({ channelId }) => channelId === channel.id
+      );
+      const newItems = feed.items.filter(
+        (item) => !oldItems.find((oldItem) => oldItem.pubDate === item.pubDate)
+      );
+      const itemsToAdd = [...newItems]
         .reverse()
-        .map((item) =>
-          _.assign({}, item, { channelId: channel.id, id: _.uniqueId() })
-        )
-        .value();
-
-      setFeedsState(state, {
-        channels: [...otherChannels, updatedChannel],
-        items: [...state.feeds.items, ...newItems],
-      });
+        .map((item) => ({ ...item, channelId: channel.id, id: _.uniqueId() }));
+      feeds.items.push(...itemsToAdd);
     })
     .catch(_.noop)
     .finally(() => setTimeout(() => updateFeed(state, url), 5000));
 };
 
-export const channelController = ({ target }, state) => {
+export const channelClickHandler = ({ target }, state) => {
   const { channelId } = target.dataset;
   const { feeds } = state;
-
-  const channels = feeds.channels.map((channel) => ({
-    ...channel,
-    isActive: channel.id === channelId,
-  }));
-
-  setFeedsState(state, { channels });
+  feeds.activeChannelId = channelId;
 };
 
-export const inputController = ({ target }, state) => {
-  const { value } = target;
-
-  const isValid = validate(value);
-  setFormState(state, { value, isValid });
+export const inputHandler = ({ target }, state) => {
+  const { form } = state;
+  form.value = target.value;
+  form.isValid = validate(state, form.value);
 };
 
-export const submitController = (event, state) => {
+export const submitHandler = (event, state) => {
   event.preventDefault();
-
   const { form, feeds } = state;
   const { value: url } = form;
-  const isDuplicate = _.some(feeds.channels, { originURL: url });
-
-  if (isDuplicate) {
-    errorHandler(state, new Error('EDUPLICATE'));
-    return;
-  }
-
-  setFormState(state, { state: 'send' });
+  form.state = 'send';
   getFeed(url)
     .then((res) => parse(res.data))
     .then((feed) => {
@@ -99,18 +88,17 @@ export const submitController = (event, state) => {
         ...feed.channel,
         id: channelId,
         originURL: url,
-        isActive: false,
       };
       const items = [...feed.items]
         .reverse()
-        .map((item) => _.assign({}, item, { channelId, id: _.uniqueId() }));
-      setFeedsState(state, {
-        channels: [...state.feeds.channels, channel],
-        items: [...state.feeds.items, ...items],
-      });
+        .map((item) => ({ ...item, channelId, id: _.uniqueId() }));
+      feeds.channels.push(channel);
+      feeds.items.push(...items);
       setTimeout(() => updateFeed(state, url), 5000);
-      setFormState(state, { value: '' });
+      form.value = '';
     })
     .catch((error) => errorHandler(state, error))
-    .finally(() => setFormState(state, { state: 'input' }));
+    .finally(() => {
+      form.state = 'input';
+    });
 };
