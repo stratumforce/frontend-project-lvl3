@@ -2,8 +2,6 @@ import _ from 'lodash';
 import $ from 'jquery';
 import i18next from 'i18next';
 
-import { channelClickHandler } from './controllers';
-
 export const getForm = () => document.forms['frm-feed'];
 
 const renderAlert = (state) => {
@@ -48,92 +46,22 @@ const renderAlert = (state) => {
 
 const renderFeeds = (state) => {
   const { feeds } = state;
-  const { activeChannelId } = feeds;
+  const { items } = feeds;
 
-  const unifyingChannel = {
-    id: '0',
-    title: i18next.t('feeds.channels.unifyingChannel'),
-  };
-  const channels = [unifyingChannel, ...feeds.channels];
-  const sortedChannels = _.sortBy(channels, ['id']);
-  const channelsElements = sortedChannels.map((channel) => {
-    const { id, title } = channel;
-    const isActive = id === activeChannelId;
-    const channelEl = document.createElement('li');
-    channelEl.classList.add('list-group-item', 'channel', 'text-truncate');
+  const posts = items.map((item) => {
+    const { link, title } = item;
     const linkEl = document.createElement('a');
-    linkEl.classList.add('channel-link', 'text-decoration-none');
-    linkEl.classList.toggle('font-weight-bold', isActive);
-    linkEl.classList.toggle('text-dark', isActive);
-    linkEl.classList.toggle('text-secondary', !isActive);
-    linkEl.dataset.channelId = id;
-    linkEl.href = '#';
-    linkEl.textContent = title;
-    linkEl.setAttribute('title', title);
-    channelEl.append(linkEl);
-    return channelEl;
-  });
-  const channelsList = document.createElement('ul');
-  channelsList.classList.add('list-group');
-  channelsList.append(...channelsElements);
-  channelsList.addEventListener('click', (event) => {
-    event.preventDefault();
-    const isLinkElement = event.target.classList.contains('channel-link');
-    if (isLinkElement) {
-      channelClickHandler(event, state);
-    }
-  });
-
-  const channelsParent = document.querySelector('.channels');
-  channelsParent.innerHTML = '';
-  channelsParent.append(channelsList);
-
-  const items =
-    activeChannelId > 0
-      ? _.filter(feeds.items, { channelId: activeChannelId })
-      : [...feeds.items];
-  const sortedItems = _.sortBy(items, ({ pubDate }) => Date.parse(pubDate));
-  const itemsElements = [...sortedItems].reverse().map((item) => {
-    const { channelId, description, link, pubDate, title } = item;
-
-    const linkEl = document.createElement('a');
-    linkEl.classList.add(
-      'item-link',
-      'text-dark',
-      'font-weight-bold',
-      'text-decoration-none'
-    );
     linkEl.href = link;
     linkEl.textContent = title;
-    linkEl.setAttribute('title', title);
     linkEl.setAttribute('target', '_blank');
-    const titleEl = document.createElement('div');
-    titleEl.classList.add('card-title', 'font-weight-bold');
-    titleEl.append(linkEl);
-    const subtitleEl = document.createElement('div');
-    subtitleEl.classList.add('card-subtitle', 'mb-2', 'text-muted', 'small');
-    const channel = _.find(feeds.channels, { id: channelId });
-    const date = new Date(pubDate).toString().split(' ').slice(0, 5).join(' ');
-    subtitleEl.textContent = `${channel.title} / ${date}`;
-    const descriptionEl = document.createElement('p');
-    descriptionEl.classList.add('card-text');
-    descriptionEl.textContent = description;
-
-    const cardEl = document.createElement('div');
-    cardEl.classList.add('card');
-    const cardBody = document.createElement('div');
-    cardBody.classList.add('card-body');
-    cardBody.append(titleEl, subtitleEl, descriptionEl);
-    cardEl.append(cardBody);
-    return cardEl;
+    const wrapper = document.createElement('div');
+    wrapper.append(linkEl);
+    return wrapper;
   });
-  const itemsList = document.createElement('div');
-  itemsList.classList.add('items-list');
-  itemsList.append(...itemsElements);
 
-  const itemsParent = document.querySelector('.items');
-  itemsParent.innerHTML = '';
-  itemsParent.append(itemsList);
+  const parent = document.querySelector('.posts');
+  parent.innerHTML = '';
+  parent.append(...posts);
 };
 
 const renderForm = (state) => {
@@ -150,7 +78,7 @@ const renderForm = (state) => {
   inputField.disabled = isSending;
 
   const button = form.querySelector('.btn');
-  const isDisabled = isInvalid || _.isEmpty(formState.value) || isSending;
+  const isDisabled = isInvalid || !formState.value || isSending;
   button.disabled = isDisabled;
   const spinner = button.querySelector('.spinner');
   spinner.hidden = !isSending;

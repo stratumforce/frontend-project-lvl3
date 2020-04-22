@@ -34,7 +34,6 @@ export default () => {
       error: '',
     },
     feeds: {
-      activeChannelId: '0',
       channels: [],
       items: [],
     },

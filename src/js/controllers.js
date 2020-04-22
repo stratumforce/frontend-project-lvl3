@@ -54,19 +54,15 @@ const updateFeed = (state, url) => {
       const newItems = feed.items.filter(
         (item) => !oldItems.find((oldItem) => oldItem.pubDate === item.pubDate)
       );
-      const itemsToAdd = [...newItems]
-        .reverse()
-        .map((item) => ({ ...item, channelId: channel.id, id: _.uniqueId() }));
-      feeds.items.push(...itemsToAdd);
+      const itemsToAdd = [...newItems].map((item) => ({
+        ...item,
+        channelId: channel.id,
+        id: _.uniqueId(),
+      }));
+      feeds.items.unshift(...itemsToAdd);
     })
     .catch(_.noop)
     .finally(() => setTimeout(() => updateFeed(state, url), 5000));
-};
-
-export const channelClickHandler = ({ target }, state) => {
-  const { channelId } = target.dataset;
-  const { feeds } = state;
-  feeds.activeChannelId = channelId;
 };
 
 export const inputHandler = ({ target }, state) => {
@@ -89,13 +85,15 @@ export const submitHandler = (event, state) => {
         id: channelId,
         originURL: url,
       };
-      const items = [...feed.items]
-        .reverse()
-        .map((item) => ({ ...item, channelId, id: _.uniqueId() }));
+      const items = [...feed.items].map((item) => ({
+        ...item,
+        channelId,
+        id: _.uniqueId(),
+      }));
       feeds.channels.push(channel);
-      feeds.items.push(...items);
-      setTimeout(() => updateFeed(state, url), 5000);
+      feeds.items.unshift(...items);
       form.value = '';
+      setTimeout(() => updateFeed(state, url), 5000);
     })
     .catch((error) => errorHandler(state, error))
     .finally(() => {
