@@ -27,7 +27,7 @@ const validate = (state, url) => {
   }
 
   const { channels } = state.feeds;
-  const isDuplicate = channels.some(({ originURL }) => originURL === url);
+  const isDuplicate = channels.some((ch) => ch.url === url);
   if (isDuplicate) {
     handleError(state, new Error('EDUPLICATE'));
     return false;
@@ -43,34 +43,23 @@ const getFeed = (url) => {
   return axios.get(urlWithCORS, { timeout: 10000 });
 };
 
-const updateFeed = (state, url) => {
+const updateFeed = (state, url, timeout) => {
   getFeed(url)
     .then((res) => parse(res.data))
-    .then((feed) => {
+    .then((posts) => {
       const { feeds } = state;
-      const { channels, posts } = feeds;
-      const channel = channels.find(({ originURL }) => originURL === url);
+      const channel = feeds.channels.find((ch) => ch.url === url);
 
-      if (channel.lastBuildDate === feed.channel.lastBuildDate) {
-        return;
-      }
-
-      channel.lastBuildDate = feed.channel.lastBuildDate;
-
-      const oldPosts = posts.filter(
+      const oldPosts = feeds.posts.filter(
         ({ channelId }) => channelId === channel.id
       );
-      const newPosts = feed.items.filter(
-        (post) => !oldPosts.find((oldPost) => oldPost.pubDate === post.pubDate)
-      );
-      const postsToAdd = [...newPosts].map((post) => ({
-        ...post,
-        channelId: channel.id,
-      }));
-      feeds.posts.unshift(...postsToAdd);
+      const newPosts = posts
+        .filter((post) => oldPosts.every(({ title }) => title !== post.title))
+        .map((post) => ({ ...post, channelId: channel.id }));
+      feeds.posts.unshift(...newPosts);
     })
     .catch(_.noop)
-    .finally(() => setTimeout(() => updateFeed(state, url), 5000));
+    .finally(() => setTimeout(() => updateFeed(state, url, timeout), timeout));
 };
 
 export const handleInput = ({ target }, state) => {
@@ -90,26 +79,24 @@ export const handleSubmit = (event, state) => {
   form.state = 'send';
   getFeed(url)
     .then((res) => parse(res.data))
-    .then((feed) => {
+    .then((posts) => {
       const channelId = _.uniqueId();
       const channel = {
-        ...feed.channel,
         id: channelId,
-        originURL: url,
+        url,
       };
-      const posts = feed.items.map((post) => ({
+      const postsToAdd = posts.map((post) => ({
         ...post,
         channelId,
       }));
       feeds.channels.push(channel);
-      feeds.posts.unshift(...posts);
+      feeds.posts.unshift(...postsToAdd);
       form.value = '';
-      setTimeout(() => updateFeed(state, url), 5000);
-    })
-    .catch((error) => handleError(state, error))
-    .finally(() => {
       form.state = 'added';
       const message = i18next.t('form.feedback.feedAdded');
       form.feedback = { isNegative: false, message };
-    });
+      const timeout = 5000;
+      setTimeout(() => updateFeed(state, url, timeout), timeout);
+    })
+    .catch((error) => handleError(state, error));
 };

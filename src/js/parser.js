@@ -7,20 +7,12 @@ export default (data) => {
   }
 
   const channelEl = dom.querySelector('channel');
-  const channel = [...channelEl.children]
-    .filter((el) => el.tagName !== 'item')
-    .reduce((acc, el) => ({ ...acc, [el.tagName]: el.textContent.trim() }), {});
-  const items = [...channelEl.children]
+  const posts = [...channelEl.children]
     .filter((el) => el.tagName === 'item')
-    .map((item) =>
-      [...item.children].reduce(
-        (acc, el) => ({ ...acc, [el.tagName]: el.textContent.trim() }),
-        {}
-      )
-    );
+    .map((item) => ({
+      description: item.querySelector('description').textContent,
+      title: item.querySelector('title').textContent,
+    }));
 
-  return {
-    channel,
-    items,
-  };
+  return posts;
 };
