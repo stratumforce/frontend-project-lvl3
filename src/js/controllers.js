@@ -67,7 +67,7 @@ export const handleInput = ({ target }, state) => {
   form.value = target.value;
   const isValid = validate(state, form.value);
   form.isValid = isValid;
-  if (isValid || form.state === 'added') {
+  if (isValid || form.state === 'success') {
     form.feedback = { isNegative: false, message: '' };
   }
 };
@@ -92,7 +92,7 @@ export const handleSubmit = (event, state) => {
       feeds.channels.push(channel);
       feeds.posts.unshift(...postsToAdd);
       form.value = '';
-      form.state = 'added';
+      form.state = 'success';
       const message = i18next.t('form.feedback.feedAdded');
       form.feedback = { isNegative: false, message };
       const timeout = 5000;
