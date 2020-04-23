@@ -16,8 +16,7 @@ const handleError = (state, error) => {
   ]);
   form.isValid = false;
   form.state = 'input';
-  form.feedback.isNegative = true;
-  form.feedback.message = message;
+  form.feedback = { isNegative: true, message };
 };
 
 const validate = (state, url) => {
