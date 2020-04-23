@@ -3,21 +3,15 @@ import i18next from 'i18next';
 import resources from './locales';
 
 import { handleInput, handleSubmit } from './controllers';
-import render, { getForm } from './view';
+import { renderFeeds, renderForm } from './view';
 
 const runWatchers = (state) => {
-  watch(state, 'form', (prop) => {
-    if (prop !== 'error') {
-      render(state, 'form');
-    }
-  });
-  watch(state.form, 'error', () => render(state, 'alert'));
-  watch(state, 'feeds', () => render(state, 'feeds'));
+  watch(state, 'form', () => renderForm(state));
+  watch(state, 'feeds', () => renderFeeds(state));
 };
 
 const setEvents = (state) => {
-  const form = getForm();
-
+  const form = document.forms['frm-feed'];
   form.addEventListener('submit', (event) => handleSubmit(event, state));
   form.addEventListener('input', (event) => handleInput(event, state));
 };
@@ -29,9 +23,12 @@ export default () => {
     },
     form: {
       state: 'input',
-      isValid: false,
+      isValid: true,
       value: '',
-      error: null,
+      feedback: {
+        isNegative: false,
+        message: '',
+      },
     },
     feeds: {
       channels: [],

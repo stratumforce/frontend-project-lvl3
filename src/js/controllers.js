@@ -1,14 +1,23 @@
 import _ from 'lodash';
 import axios from 'axios';
 import { string } from 'yup';
+import i18next from 'i18next';
 
 import parse from './parser';
 
-const errorHandler = (state, error) => {
+const handleError = (state, error) => {
   const { form } = state;
+  const path = 'form.feedback.';
+  const message = i18next.t([
+    `${path}${error.code}`,
+    `${path}${_.get(error, 'response.status')}`,
+    `${path}${error.message}`,
+    `${path}default`,
+  ]);
   form.isValid = false;
   form.state = 'input';
-  form.error = error;
+  form.feedback.isNegative = true;
+  form.feedback.message = message;
 };
 
 const validate = (state, url) => {
@@ -20,18 +29,18 @@ const validate = (state, url) => {
   const { channels } = state.feeds;
   const isDuplicate = channels.some(({ originURL }) => originURL === url);
   if (isDuplicate) {
-    errorHandler(state, new Error('EDUPLICATE'));
+    handleError(state, new Error('EDUPLICATE'));
     return false;
   }
 
   return true;
 };
 
-const getFeed = (originURL) => {
+const getFeed = (url) => {
   const corsAnywhereURL = 'https://cors-anywhere.herokuapp.com/';
-  const url = `${corsAnywhereURL}${originURL}`;
+  const urlWithCORS = `${corsAnywhereURL}${url}`;
 
-  return axios.get(url, { timeout: 10000 });
+  return axios.get(urlWithCORS, { timeout: 10000 });
 };
 
 const updateFeed = (state, url) => {
@@ -57,7 +66,6 @@ const updateFeed = (state, url) => {
       const postsToAdd = [...newPosts].map((post) => ({
         ...post,
         channelId: channel.id,
-        id: _.uniqueId(),
       }));
       feeds.posts.unshift(...postsToAdd);
     })
@@ -68,7 +76,11 @@ const updateFeed = (state, url) => {
 export const handleInput = ({ target }, state) => {
   const { form } = state;
   form.value = target.value;
-  form.isValid = validate(state, form.value);
+  const isValid = validate(state, form.value);
+  form.isValid = isValid;
+  if (isValid || form.state === 'added') {
+    form.feedback = { isNegative: false, message: '' };
+  }
 };
 
 export const handleSubmit = (event, state) => {
@@ -88,15 +100,16 @@ export const handleSubmit = (event, state) => {
       const posts = feed.items.map((post) => ({
         ...post,
         channelId,
-        id: _.uniqueId(),
       }));
       feeds.channels.push(channel);
       feeds.posts.unshift(...posts);
       form.value = '';
       setTimeout(() => updateFeed(state, url), 5000);
     })
-    .catch((error) => errorHandler(state, error))
+    .catch((error) => handleError(state, error))
     .finally(() => {
-      form.state = 'input';
+      form.state = 'added';
+      const message = i18next.t('form.feedback.feedAdded');
+      form.feedback = { isNegative: false, message };
     });
 };

@@ -57,9 +57,6 @@ module.exports = {
     }),
     new LodashModuleReplacementPlugin(),
     new webpack.ProvidePlugin({
-      $: 'jquery',
-      Popper: ['popper.js', 'default'],
-      Alert: 'exports-loader?Alert!bootstrap/js/dist/alert',
       Button: 'exports-loader?Button!bootstrap/js/dist/button',
       Util: 'exports-loader?Util!bootstrap/js/dist/util',
     }),
