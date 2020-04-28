@@ -45,14 +45,14 @@ const getFeed = (url) => {
 const updateFeed = (state, url, timeout) => {
   getFeed(url)
     .then((res) => parse(res.data))
-    .then((posts) => {
+    .then((feed) => {
       const { feeds } = state;
       const channel = feeds.channels.find((ch) => ch.url === url);
 
       const oldPosts = feeds.posts.filter(
         ({ channelId }) => channelId === channel.id
       );
-      const newPosts = posts
+      const newPosts = feed.posts
         .filter((post) => oldPosts.every(({ title }) => title !== post.title))
         .map((post) => ({ ...post, channelId: channel.id }));
       feeds.posts.unshift(...newPosts);
@@ -78,13 +78,14 @@ export const handleSubmit = (event, state) => {
   form.state = 'send';
   getFeed(url)
     .then((res) => parse(res.data))
-    .then((posts) => {
+    .then((feed) => {
       const channelId = _.uniqueId();
       const channel = {
+        ...feed.channel,
         id: channelId,
         url,
       };
-      const postsToAdd = posts.map((post) => ({
+      const postsToAdd = feed.posts.map((post) => ({
         ...post,
         channelId,
       }));

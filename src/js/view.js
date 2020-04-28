@@ -1,7 +1,27 @@
 export const renderFeeds = (state) => {
-  const { posts } = state.feeds;
+  const { channels, posts } = state.feeds;
 
-  const links = posts.map((post) => {
+  const channelsElements = channels.map((channel) => {
+    const { title, description } = channel;
+    const card = document.createElement('div');
+    card.classList.add('card');
+    const cardBody = document.createElement('div');
+    cardBody.classList.add('card-body');
+    const cardTitle = document.createElement('h5');
+    cardTitle.innerText = title;
+    const cardText = document.createElement('div');
+    cardText.classList.add('card-text');
+    cardText.innerText = description;
+    cardBody.append(cardTitle, cardText);
+    card.append(cardBody);
+    return card;
+  });
+
+  const channelsParent = document.querySelector('.channels');
+  channelsParent.innerHTML = '';
+  channelsParent.append(...channelsElements);
+
+  const postsElements = posts.map((post) => {
     const { link, title } = post;
     const linkEl = document.createElement('a');
     linkEl.href = link;
@@ -12,9 +32,9 @@ export const renderFeeds = (state) => {
     return wrapper;
   });
 
-  const parent = document.querySelector('.posts');
-  parent.innerHTML = '';
-  parent.append(...links);
+  const postsParent = document.querySelector('.posts');
+  postsParent.innerHTML = '';
+  postsParent.append(...postsElements);
 };
 
 export const renderForm = (state) => {
