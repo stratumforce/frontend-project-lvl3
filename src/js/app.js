@@ -10,16 +10,9 @@ import { renderFeeds, renderForm } from './view';
 
 const handleError = (state, error) => {
   const { form } = state;
-  const path = 'form.feedback.';
-  const message = i18next.t([
-    `${path}${error.code}`,
-    `${path}${_.get(error, 'response.status')}`,
-    `${path}${error.message}`,
-    `${path}default`,
-  ]);
   form.isValid = false;
+  form.error = error;
   form.processState = 'filling';
-  form.feedback = { isNegative: true, message };
 };
 
 const validate = (registeredUrls, url) => {
@@ -77,8 +70,8 @@ const handleInput = ({ target }, state) => {
   }
   form.isValid = isValid;
 
-  if (isValid || form.processState === 'finished') {
-    form.feedback = { isNegative: false, message: '' };
+  if (isValid) {
+    form.error = null;
   }
 };
 
@@ -104,8 +97,6 @@ const handleSubmit = (event, state) => {
       feeds.posts.unshift(...postsToAdd);
       form.value = '';
       form.processState = 'finished';
-      const message = i18next.t('form.feedback.feedAdded');
-      form.feedback = { isNegative: false, message };
       const timeout = 5000;
       setTimeout(() => updateFeed(state, url, timeout), timeout);
     })
@@ -132,10 +123,7 @@ export default () => {
       processState: 'filling',
       isValid: true,
       value: '',
-      feedback: {
-        isNegative: false,
-        message: '',
-      },
+      error: null,
     },
     feeds: {
       channels: [],

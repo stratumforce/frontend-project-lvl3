@@ -1,3 +1,6 @@
+import _ from 'lodash';
+import i18next from 'i18next';
+
 export const renderFeeds = (state) => {
   const { channels, posts } = state.feeds;
 
@@ -38,7 +41,7 @@ export const renderFeeds = (state) => {
 };
 
 export const renderForm = (state) => {
-  const { isValid, value, processState } = state.form;
+  const { error, isValid, processState, value } = state.form;
 
   const isInvalid = isValid === false;
   const isSending = processState === 'sending';
@@ -56,8 +59,15 @@ export const renderForm = (state) => {
   const spinner = button.querySelector('.spinner');
   spinner.hidden = !isSending;
 
-  const { isNegative, message } = state.form.feedback;
-  const feedbackEl = document.querySelector('.feedback');
-  feedbackEl.classList.toggle('text-danger', isNegative);
-  feedbackEl.textContent = message;
+  const path = 'form.error.';
+  const message = error
+    ? i18next.t([
+        `${path}${error.code}`,
+        `${path}${_.get(error, 'response.status')}`,
+        `${path}${error.message}`,
+        `${path}default`,
+      ])
+    : '';
+  const errorEl = document.querySelector('.error');
+  errorEl.textContent = message;
 };
