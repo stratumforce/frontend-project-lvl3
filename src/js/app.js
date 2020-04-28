@@ -53,10 +53,12 @@ const updateFeed = (state, url, timeout) => {
       const oldPosts = feeds.posts.filter(
         ({ channelId }) => channelId === channel.id
       );
-      const newPosts = feed.posts
-        .filter((post) => oldPosts.every(({ title }) => title !== post.title))
-        .map((post) => ({ ...post, channelId: channel.id }));
-      feeds.posts.unshift(...newPosts);
+      const newPosts = _.differenceBy(feed.posts, oldPosts, 'title');
+      const postsToAdd = newPosts.map((post) => ({
+        ...post,
+        channelId: channel.id,
+      }));
+      feeds.posts.unshift(...postsToAdd);
     })
     .catch(_.noop)
     .finally(() => setTimeout(() => updateFeed(state, url, timeout), timeout));
