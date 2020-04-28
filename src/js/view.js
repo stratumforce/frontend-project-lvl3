@@ -38,10 +38,10 @@ export const renderFeeds = (state) => {
 };
 
 export const renderForm = (state) => {
-  const { isValid, value, state: formState } = state.form;
+  const { isValid, value, processState } = state.form;
 
   const isInvalid = isValid === false;
-  const isSending = formState === 'send';
+  const isSending = processState === 'sending';
 
   const form = document.forms['frm-feed'];
   const inputField = form.elements.feed;

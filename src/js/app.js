@@ -18,7 +18,7 @@ const handleError = (state, error) => {
     `${path}default`,
   ]);
   form.isValid = false;
-  form.state = 'input';
+  form.processState = 'filling';
   form.feedback = { isNegative: true, message };
 };
 
@@ -75,7 +75,7 @@ const handleInput = ({ target }, state) => {
   }
   form.isValid = isValid;
 
-  if (isValid || form.state === 'success') {
+  if (isValid || form.processState === 'finished') {
     form.feedback = { isNegative: false, message: '' };
   }
 };
@@ -84,7 +84,7 @@ const handleSubmit = (event, state) => {
   event.preventDefault();
   const { form, feeds } = state;
   const { value: url } = form;
-  form.state = 'send';
+  form.processState = 'sending';
   getFeed(url)
     .then((res) => parse(res.data))
     .then((feed) => {
@@ -101,7 +101,7 @@ const handleSubmit = (event, state) => {
       feeds.channels.push(channel);
       feeds.posts.unshift(...postsToAdd);
       form.value = '';
-      form.state = 'success';
+      form.processState = 'finished';
       const message = i18next.t('form.feedback.feedAdded');
       form.feedback = { isNegative: false, message };
       const timeout = 5000;
@@ -127,7 +127,7 @@ export default () => {
       lang: 'en',
     },
     form: {
-      state: 'input',
+      processState: 'filling',
       isValid: true,
       value: '',
       feedback: {
