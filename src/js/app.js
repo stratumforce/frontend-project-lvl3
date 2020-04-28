@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import axios from 'axios';
 import { watch } from 'melanke-watchjs';
-import { string } from 'yup';
+import { mixed, string } from 'yup';
 import i18next from 'i18next';
 import resources from './locales';
 
@@ -22,17 +22,15 @@ const handleError = (state, error) => {
   form.feedback = { isNegative: true, message };
 };
 
-const validate = (state, url) => {
+const validate = (registeredUrls, url) => {
   const isValidURL = string().required().url().isValidSync(url);
   if (!isValidURL) {
-    return false;
+    throw new Error('EINVALIDURL');
   }
 
-  const { channels } = state.feeds;
-  const isDuplicate = channels.some((ch) => ch.url === url);
+  const isDuplicate = mixed().oneOf(registeredUrls).isValidSync(url);
   if (isDuplicate) {
-    handleError(state, new Error('EDUPLICATE'));
-    return false;
+    throw new Error('EDUPLICATE');
   }
 
   return true;
@@ -67,8 +65,16 @@ const updateFeed = (state, url, timeout) => {
 const handleInput = ({ target }, state) => {
   const { form } = state;
   form.value = target.value;
-  const isValid = validate(state, form.value);
+
+  let isValid = false;
+  try {
+    const registeredUrls = state.feeds.channels.map(({ url }) => url);
+    isValid = validate(registeredUrls, form.value);
+  } catch (error) {
+    handleError(state, error);
+  }
   form.isValid = isValid;
+
   if (isValid || form.state === 'success') {
     form.feedback = { isNegative: false, message: '' };
   }
