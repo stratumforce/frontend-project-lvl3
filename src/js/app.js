@@ -95,6 +95,7 @@ const handleSubmit = (event, state) => {
       }));
       feeds.channels.push(channel);
       feeds.posts.unshift(...postsToAdd);
+      feeds.activeChannelId = channelId;
       form.value = '';
       form.processState = 'finished';
       const timeout = 5000;
@@ -112,6 +113,11 @@ const setEvents = (state) => {
   const form = document.forms['frm-feed'];
   form.addEventListener('submit', (event) => handleSubmit(event, state));
   form.addEventListener('input', (event) => handleInput(event, state));
+  const channels = document.querySelector('.channels');
+  channels.addEventListener('click', ({ target }) => {
+    const { feeds } = state;
+    feeds.activeChannelId = target.dataset.id;
+  });
 };
 
 export default () => {
@@ -126,6 +132,7 @@ export default () => {
       error: null,
     },
     feeds: {
+      activeChannelId: null,
       channels: [],
       posts: [],
     },

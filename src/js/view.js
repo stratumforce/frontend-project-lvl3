@@ -2,33 +2,40 @@ import _ from 'lodash';
 import i18next from 'i18next';
 
 export const renderFeeds = (state) => {
-  const { channels, posts } = state.feeds;
+  const { activeChannelId, channels, posts } = state.feeds;
 
-  const channelsElements = channels.map((channel) => {
-    const { title, description } = channel;
+  const channelsCards = channels.map((channel) => {
+    const isActiveChannel = channel.id === activeChannelId;
     const card = document.createElement('div');
     card.classList.add('card');
+    card.classList.toggle('bg-success', isActiveChannel);
+    card.classList.toggle('text-light', isActiveChannel);
     const cardBody = document.createElement('div');
     cardBody.classList.add('card-body');
     const cardTitle = document.createElement('h5');
-    cardTitle.innerText = title;
-    const cardText = document.createElement('div');
+    cardTitle.classList.add('card-title');
+    cardTitle.textContent = channel.title;
+    const cardText = document.createElement('p');
     cardText.classList.add('card-text');
-    cardText.innerText = description;
-    cardBody.append(cardTitle, cardText);
+    cardText.textContent = channel.description;
+    const link = document.createElement('a');
+    link.classList.add('stretched-link');
+    link.href = '#';
+    link.dataset.id = channel.id;
+    cardBody.append(cardTitle, cardText, link);
     card.append(cardBody);
     return card;
   });
 
   const channelsParent = document.querySelector('.channels');
   channelsParent.innerHTML = '';
-  channelsParent.append(...channelsElements);
+  channelsParent.append(...channelsCards);
 
-  const postsElements = posts.map((post) => {
-    const { link, title } = post;
+  const activePosts = posts.filter((p) => p.channelId === activeChannelId);
+  const postsElements = activePosts.map((post) => {
     const linkEl = document.createElement('a');
-    linkEl.href = link;
-    linkEl.textContent = title;
+    linkEl.href = post.link;
+    linkEl.textContent = post.title;
     linkEl.setAttribute('target', '_blank');
     const wrapper = document.createElement('div');
     wrapper.append(linkEl);
