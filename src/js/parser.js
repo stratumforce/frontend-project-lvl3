@@ -11,8 +11,9 @@ export default (data) => {
     description: dom.querySelector('channel description').textContent.trim(),
   };
   const posts = [...dom.querySelectorAll('item')].map((item) => ({
-    description: item.querySelector('description').textContent,
-    title: item.querySelector('title').textContent,
+    description: item.querySelector('description').textContent.trim(),
+    title: item.querySelector('title').textContent.trim(),
+    link: item.querySelector('link').textContent.trim(),
   }));
 
   return {

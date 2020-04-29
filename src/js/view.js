@@ -33,18 +33,20 @@ export const renderFeeds = (state) => {
 
   const activePosts = posts.filter((p) => p.channelId === activeChannelId);
   const postsElements = activePosts.map((post) => {
-    const linkEl = document.createElement('a');
-    linkEl.href = post.link;
-    linkEl.textContent = post.title;
-    linkEl.setAttribute('target', '_blank');
-    const wrapper = document.createElement('div');
-    wrapper.append(linkEl);
-    return wrapper;
+    const postEl = document.createElement('a');
+    postEl.classList.add('list-group-item', 'list-group-item-action');
+    postEl.href = post.link;
+    postEl.textContent = post.title;
+    postEl.setAttribute('target', '_blank');
+    return postEl;
   });
 
+  const postsContainer = document.createElement('div');
+  postsContainer.classList.add('list-group');
+  postsContainer.append(...postsElements);
   const postsParent = document.querySelector('.posts');
   postsParent.innerHTML = '';
-  postsParent.append(...postsElements);
+  postsParent.append(postsContainer);
 };
 
 export const renderForm = (state) => {
