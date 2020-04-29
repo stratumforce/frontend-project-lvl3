@@ -46,7 +46,7 @@ const updateFeed = (state, url, timeout) => {
       const oldPosts = feeds.posts.filter(
         ({ channelId }) => channelId === channel.id
       );
-      const newPosts = _.differenceBy(feed.posts, oldPosts, 'title');
+      const newPosts = _.differenceBy(feed.posts, oldPosts, 'link');
       const postsToAdd = newPosts.map((post) => ({
         ...post,
         channelId: channel.id,
