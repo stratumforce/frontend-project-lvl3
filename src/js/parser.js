@@ -7,13 +7,13 @@ export default (data) => {
   }
 
   const channel = {
-    title: dom.querySelector('channel title').textContent.trim(),
-    description: dom.querySelector('channel description').textContent.trim(),
+    title: dom.querySelector('channel title').textContent,
+    description: dom.querySelector('channel description').textContent,
   };
   const posts = [...dom.querySelectorAll('item')].map((item) => ({
-    description: item.querySelector('description').textContent.trim(),
-    title: item.querySelector('title').textContent.trim(),
-    link: item.querySelector('link').textContent.trim(),
+    description: item.querySelector('description').textContent,
+    title: item.querySelector('title').textContent,
+    link: item.querySelector('link').textContent,
   }));
 
   return {
