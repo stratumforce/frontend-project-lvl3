@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import axios from 'axios';
 import { watch } from 'melanke-watchjs';
-import { mixed, string } from 'yup';
+import { string } from 'yup';
 import i18next from 'i18next';
 import resources from './locales';
 
@@ -10,24 +10,13 @@ import { renderFeeds, renderForm } from './view';
 
 const handleError = (state, error) => {
   const { form } = state;
-  form.isValid = false;
   form.error = error;
+  form.validationState = 'invalid';
   form.processState = 'filling';
 };
 
-const validate = (registeredUrls, url) => {
-  const isValidURL = string().required().url().isValidSync(url);
-  if (!isValidURL) {
-    throw new Error('EINVALIDURL');
-  }
-
-  const isDuplicate = mixed().oneOf(registeredUrls).isValidSync(url);
-  if (isDuplicate) {
-    throw new Error('EDUPLICATE');
-  }
-
-  return true;
-};
+const validate = (url, registeredUrls) =>
+  string().url().notOneOf(registeredUrls).validateSync(url);
 
 const getFeed = (url) => {
   const corsAnywhereURL = 'https://cors-anywhere.herokuapp.com/';
@@ -61,17 +50,14 @@ const handleInput = ({ target }, state) => {
   const { form } = state;
   form.value = target.value;
 
-  let isValid = false;
+  const registeredUrls = state.feeds.channels.map(({ url }) => url);
+
   try {
-    const registeredUrls = state.feeds.channels.map(({ url }) => url);
-    isValid = validate(registeredUrls, form.value);
+    validate(form.value, registeredUrls);
+    form.validationState = 'valid';
+    form.error = null;
   } catch (error) {
     handleError(state, error);
-  }
-  form.isValid = isValid;
-
-  if (isValid) {
-    form.error = null;
   }
 };
 
@@ -127,7 +113,7 @@ export default () => {
     },
     form: {
       processState: 'filling',
-      isValid: true,
+      validationState: 'valid',
       value: '',
       error: null,
     },

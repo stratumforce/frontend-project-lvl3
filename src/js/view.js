@@ -50,9 +50,9 @@ export const renderFeeds = (state) => {
 };
 
 export const renderForm = (state) => {
-  const { error, isValid, processState, value } = state.form;
+  const { error, processState, validationState, value } = state.form;
 
-  const isInvalid = isValid === false;
+  const isInvalid = validationState === 'invalid';
   const isSending = processState === 'sending';
 
   const form = document.forms['frm-feed'];
@@ -72,6 +72,7 @@ export const renderForm = (state) => {
   const message = error
     ? i18next.t([
         `${path}${error.code}`,
+        `${path}${error.type}`,
         `${path}${_.get(error, 'response.status')}`,
         `${path}${error.message}`,
         `${path}default`,
